@@ -2,10 +2,12 @@ import { NextPage } from 'next';
 import React from 'react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import Navbar from '@/components/Navbar';
+import Seo from '@/components/Seo';
 
 const Index: NextPage = () => {
   return (
     <AuthenticatedLayout>
+      <Seo templateTitle="Home" />
       <main className="flex">
         <div className="flex flex-col flex-auto">
           <Navbar />

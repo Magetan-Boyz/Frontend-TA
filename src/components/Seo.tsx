@@ -5,10 +5,10 @@ import React from 'react';
 // !STARTERCONF Change these default meta
 const defaultMeta = {
   title: 'SMPN1 Magetan - Development',
-  siteName: '',
+  siteName: 'SMPN1 Magetan - Development',
   description: '',
   /** Without additional '/' on the end, e.g. https://theodorusclarence.com */
-  url: 'https://docheck.id',
+  url: '',
   type: 'website',
   robots: 'follow, index',
   /**
@@ -93,19 +93,13 @@ const favicons: Array<React.ComponentPropsWithoutRef<'link'>> = [
     rel: 'icon',
     type: 'image/png',
     sizes: '32x32',
-    href: '/favicon/docheck-54x54.png'
+    href: '/favicon/apple-touch-icon.png'
   },
   {
     rel: 'icon',
     type: 'image/png',
     sizes: '16x16',
-    href: '/favicon/docheck-54x54.png'
+    href: '/favicon/apple-touch-icon.png'
   },
-  { rel: 'manifest', href: '/favicon/site.webmanifest' },
-  {
-    rel: 'mask-icon',
-    href: '/favicon/docheck-54x54.png',
-    color: '#00e887'
-  },
-  { rel: 'shortcut icon', href: '/favicon/docheck-54x54.png' }
+  { rel: 'manifest', href: '/favicon/site.webmanifest' }
 ];
