@@ -4,7 +4,9 @@ import PrimaryButton from '@/components/PrimaryButton';
 import TextInput from '@/components/TextInput';
 import Layout from '@/components/layout/Layout';
 import HeadTag from '@/components/HeadTag';
+
 import Section from '../public/Section.png';
+import Logo from '../public/logo-smp.png';
 import Image from 'next/image';
 
 import { BsEye } from 'react-icons/bs';
@@ -38,8 +40,12 @@ export default function Login() {
       <main className="lg:flex">
         <HeadTag title="Login" />
         <div className="py-[48px] px-8 lg:w-full lg:py-[184px] lg:px-[184px]">
+          <div className="items-center gap-2 lg:flex lg:mb-[80px]">
+            <Image src={Logo} alt="Logo" width={40} />
+            <h1 className="hidden text-3xl font-semibold text-Gray-900 lg:flex">SMPN 1 Magetan</h1>
+          </div>
           <div className="pt-5">
-            <h1 className="text-xl font-semibold text-Gray-900">Log in</h1>
+            <h1 className="text-xl font-semibold lg:text-4xl text-Gray-900">Log in</h1>
             <h1 className="mt-2 font-light text-Gray-600">Welcome back! Please enter your details.</h1>
           </div>
           <div className="mt-5">
@@ -59,7 +65,7 @@ export default function Login() {
                 <div className="relative">
                   <TextInput
                     placeholder="••••••••"
-                    inputClassName={`w-full rounded-lg ${error === false ? 'border-Gray-300' : 'border-Error-300'} border-2 py-[10px] px-[14px] placeholder:text-Gray-500`}
+                    inputClassName={`w-full rounded-lg ${error === false ? 'border-Gray-300' : 'border-Error-300'} shadow border-2 py-[10px] px-[14px] placeholder:text-Gray-500`}
                     type={open ? 'text' : 'password'}
                     value={data?.password}
                     onChange={(event) => {

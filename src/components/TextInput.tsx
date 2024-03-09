@@ -35,7 +35,7 @@ export default function TextInput({
       autoComplete={autoComplete || 'off'}
       {...rest}
       className={clsxm(
-        inputClassName ? inputClassName : 'w-full rounded-lg border-Gray-300 border-2 py-[10px] px-[14px] placeholder:text-Gray-500'
+        inputClassName ? inputClassName : 'w-full rounded-lg border-Gray-300 border-2 shadow py-[10px] px-[14px] placeholder:text-Gray-500'
       )}
     />
   );
