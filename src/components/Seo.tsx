@@ -15,7 +15,7 @@ const defaultMeta = {
    * No need to be filled, will be populated with openGraph function
    * If you wish to use a normal image, just specify the path below
    */
-  image: 'https://docheck.id/wp-content/uploads/2021/09/Logo_DoCheck_512x512-removebg-preview.png'
+  image: ''
 };
 
 type SeoProps = {
@@ -71,11 +71,15 @@ export default function Seo(props: SeoProps) {
       )}
 
       {/* Favicons */}
-      {favicons.map((linkProps) => (
-        <link key={linkProps.href} {...linkProps} />
-      ))}
-      <meta name="msapplication-TileColor" content="#ffffff" />
-      <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
+      <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png" />
+      <link rel="icon" type="image/png" sizes="144x144" href="/logo144x144.png" />
+      <link rel="manifest" href="favicon/manifest.json" />
+      <link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#5bbad5" />
+      <link rel="shortcut icon" href="/favicon.ico" />
+      <meta name="msapplication-TileColor" content="#da532c" />
+      <meta name="msapplication-config" content="favicon/browserconfig.xml" />
       <meta name="theme-color" content="#ffffff" />
     </Head>
   );
@@ -83,23 +87,23 @@ export default function Seo(props: SeoProps) {
 
 // !STARTERCONF this is the default favicon, you can generate your own from https://realfavicongenerator.net/
 // ! then replace the whole /public/favicon folder and favicon.ico
-const favicons: Array<React.ComponentPropsWithoutRef<'link'>> = [
-  {
-    rel: 'apple-touch-icon',
-    sizes: '180x180',
-    href: '/favicon/apple-touch-icon.png'
-  },
-  {
-    rel: 'icon',
-    type: 'image/png',
-    sizes: '32x32',
-    href: '/favicon/apple-touch-icon.png'
-  },
-  {
-    rel: 'icon',
-    type: 'image/png',
-    sizes: '16x16',
-    href: '/favicon/apple-touch-icon.png'
-  },
-  { rel: 'manifest', href: '/favicon/site.webmanifest' }
-];
+// const favicons: Array<React.ComponentPropsWithoutRef<'link'>> = [
+//   {
+//     rel: 'apple-touch-icon',
+//     sizes: '180x180',
+//     href: '../public/favicon/apple-touch-icon.png'
+//   },
+//   {
+//     rel: 'icon',
+//     type: 'image/png',
+//     sizes: '32x32',
+//     href: '../public/favicon/apple-touch-icon.png'
+//   },
+//   {
+//     rel: 'icon',
+//     type: 'image/png',
+//     sizes: '16x16',
+//     href: '/favicon/apple-touch-icon.png'
+//   },
+//   { rel: 'manifest', href: '/favicon/site.webmanifest' }
+// ];

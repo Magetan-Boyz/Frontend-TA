@@ -1,12 +1,14 @@
 import * as React from 'react';
-import Checkbox from '@/components/Checkbox';
-import PrimaryButton from '@/components/PrimaryButton';
-import TextInput from '@/components/TextInput';
-import Layout from '@/components/layout/Layout';
-import HeadTag from '@/components/HeadTag';
-
-import Section from '../public/Section.png';
-import Logo from '../public/logo-smp.png';
+import Checkbox from '../components/Checkbox';
+import PrimaryButton from '../components/PrimaryButton';
+import TextInput from '../components/TextInput';
+import Layout from '../components/layout/Layout';
+// import HeadTag from '../components/HeadTag';
+import Seo from '../components/Seo';
+// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../public/logo-smp.png'.
+import Section from '../../public/Section.png';
+// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../public/logo-smp.png'.
+import Logo from '../../public/logo-smp.png';
 import Image from 'next/image';
 
 import { BsEye } from 'react-icons/bs';
@@ -37,8 +39,8 @@ export default function Login() {
   };
   return (
     <Layout>
+      <Seo templateTitle="Login" />
       <main className="lg:flex">
-        <HeadTag title="Login" />
         <div className="py-[48px] px-8 lg:w-full lg:py-[184px] lg:px-[184px]">
           <div className="items-center gap-2 lg:flex lg:mb-[80px]">
             <Image src={Logo} alt="Logo" width={40} />
