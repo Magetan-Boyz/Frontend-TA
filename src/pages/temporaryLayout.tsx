@@ -8,7 +8,7 @@ export default function temporaryLayout() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <main className="flex">
+        <main className="flex bg-Gray-300">
           <div className="flex flex-col flex-auto">
             <Navbar />
           </div>

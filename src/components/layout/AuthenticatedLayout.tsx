@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import Sidebar from '@/components/Sidebar';
+import Sidebar from '@/components/sidebar/Sidebar';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   // Put Header or Footer Here
   return (
     <div className="flex overflow-x-hidden">
       <Sidebar />
-      <div className="flex-auto w-full">{children}</div>
+      <div className="flex-auto">{children}</div>
     </div>
   );
 }

@@ -5,28 +5,34 @@ import TextInput from '../components/TextInput';
 import Layout from '../components/layout/Layout';
 // import HeadTag from '../components/HeadTag';
 import Seo from '../components/Seo';
-// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../public/logo-smp.png'.
 import Section from '../../public/Section.png';
-// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../public/logo-smp.png'.
 import Logo from '../../public/logo-smp.png';
 import Image from 'next/image';
+import axios from 'axios';
 
 import { BsEye } from 'react-icons/bs';
 import { BsEyeSlash } from 'react-icons/bs';
+// import { useRouter } from 'next/router';
 
 export default function Login() {
-  const [data, setData] = React.useState({ email: '', password: '' });
+  const [data, setData] = React.useState({ username: '', password: '' });
   const [error, setError] = React.useState(false);
   const [is_loading, setIsLoading] = React.useState(false);
   const [open, setopen] = React.useState(false);
+  // const router = useRouter();
 
   const toggle = () => {
     setopen(!open);
   };
 
   const handleClick = () => {
-    setError(true);
-    setIsLoading(true);
+    axios.post('https://localhost:3000/auth/login', data).then((response) => {
+      if (response.status === 200) {
+        setError(true);
+        setIsLoading(true);
+        // router.push('/temporaryLayout');
+      }
+    });
   };
 
   const setDataHandler = (field: string, value: unknown) => {
@@ -56,9 +62,9 @@ export default function Login() {
                 <label htmlFor="email">Email</label>
                 <TextInput
                   placeholder="Enter yor email"
-                  value={data?.email}
+                  value={data?.username}
                   onChange={(event) => {
-                    setDataHandler('email', event.target.value);
+                    setDataHandler('username', event.target.value);
                   }}
                 />
               </div>
