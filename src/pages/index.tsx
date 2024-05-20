@@ -3,8 +3,7 @@ import React from 'react';
 import Seo from '../components/Seo';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../public/logo-smp.png'.
-import { Logo } from '../../public/logo-smp.png';
+import Logo from '../../public/logo-smp.png';
 import PrimaryButton from '../components/PrimaryButton';
 
 const Index: NextPage = () => {
