@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Seo from '../components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';
+import ScheduleCard from '@/components/ScheduleCard';
 // import { Calendar } from '@/components/ui/calendar';
 // import { CarouselPlugin } from '@/components/Carousel';
 
@@ -25,6 +26,24 @@ export default function temporaryLayout() {
     setDisabledDays(holidayDates);
   }, []);
   const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
+
+  const schedule = [
+    {
+      title: 'Meeting',
+      status: 'done',
+      time: '08:00 - 09:00'
+    },
+    {
+      title: 'Lunch',
+      status: 'ongoing',
+      time: '12:00 - 13:00'
+    },
+    {
+      title: 'Dinner',
+      status: 'inactive',
+      time: '18:00 - 19:00'
+    }
+  ];
   return (
     <div>
       <AuthenticatedLayout>
@@ -37,6 +56,9 @@ export default function temporaryLayout() {
               <div className="px-3 py-6 rounded-xl bg-Base-white">
                 <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} showOutsideDays disabled={disabledDays} />
                 <h1 className="pt-5 pl-6 font-semibold">{selectedDate.toDateString()}</h1>
+                {schedule.map((item, index) => (
+                  <ScheduleCard key={index} title={item.title} status={item.status} time={item.time} className="mt-5" />
+                ))}
               </div>
             </div>
           </div>
