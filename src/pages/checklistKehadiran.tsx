@@ -1,0 +1,102 @@
+import * as React from 'react';
+import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import Navbar from '@/components/Navbar';
+import Seo from '@/components/Seo';
+import { FiEdit } from 'react-icons/fi';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Tag, TagLabel, Input, Select, Button } from '@chakra-ui/react';
+
+export default function ChecklistKehadiran() {
+  const user = [
+    {
+      name: 'John Doe',
+      email: 'johndoe@gmail.com',
+      nim: '1234567890',
+      status: 'Hadir',
+      keterangan: '-'
+    },
+    {
+      name: 'Jane Doe',
+      email: 'jane@gmail.com',
+      nim: '0987654321',
+      status: 'Hadir',
+      keterangan: '-'
+    },
+    {
+      name: 'John Smith',
+      email: 'john@gmail.com',
+      nim: '1234567890',
+      status: 'Hadir',
+      keterangan: '-'
+    }
+  ];
+
+  return (
+    <div>
+      <AuthenticatedLayout>
+        <Seo templateTitle="Home" />
+        <main className="flex bg-Gray-50">
+          <div className="flex flex-col flex-auto">
+            <Navbar />
+            <div className="flex justify-center h-screen p-10">
+              <div className="w-full h-full rounded-md shadow-lg bg-Base-white">
+                <div className="flex items-center justify-between p-4">
+                  <h1 className="flex items-center gap-2 text-lg font-semibold">
+                    Daftar siswa{' '}
+                    <Tag colorScheme="blue" borderRadius="full" size="sm">
+                      <TagLabel>20 Siswa</TagLabel>
+                    </Tag>
+                  </h1>
+                  <div className="flex items-center gap-2">
+                    <Input size="md" type="date" />
+                    <Select placeholder="Kelas" size="md">
+                      <option value="1">X</option>
+                      <option value="2">XI</option>
+                      <option value="3">XII</option>
+                    </Select>
+                    <Button colorScheme="gray" variant="outline" size="md" leftIcon={<FiEdit />} paddingLeft={8} paddingRight={8}>
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Name</Th>
+                        <Th>Nomor Induk</Th>
+                        <Th>Email</Th>
+                        <Th>Status</Th>
+                        <Th>Keterangan</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {user.map((item, index) => (
+                        <Tr key={index}>
+                          <Td>{item.name}</Td>
+                          <Td>{item.nim}</Td>
+                          <Td>{item.email}</Td>
+                          <Td>
+                            {item.status === 'Hadir' ? (
+                              <Tag colorScheme="green" borderRadius="full" size="sm">
+                                <TagLabel>Hadir</TagLabel>
+                              </Tag>
+                            ) : (
+                              <Tag colorScheme="red" borderRadius="full" size="sm">
+                                <TagLabel>Tidak Hadir</TagLabel>
+                              </Tag>
+                            )}
+                          </Td>
+                          <Td>{item.keterangan}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </div>
+            </div>
+          </div>
+        </main>
+      </AuthenticatedLayout>
+    </div>
+  );
+}

@@ -44,7 +44,7 @@ export default function Sidebar() {
               </button>
               <div className="mx-auto border-t w-full border-[#BBBBBB]">
                 <div className="flex gap-4 mt-6">
-                  <Image src="https://ui-avatars.com/api/?name=John+Doe" alt="Logo" width={24} height={24} className="rounded-full" />
+                  <Image src="https://ui-avatars.com/api/?name=John+Doe" alt="Logo" width={40} height={24} className="rounded-full" />
                   <div>
                     <p className="hidden text-sm font-semibold lg:block">Olivia Rodrigo</p>
                     <p className="hidden text-sm text-Gray-600 lg:block">{subString}</p>

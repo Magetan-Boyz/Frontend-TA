@@ -5,45 +5,75 @@ import Seo from '../components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import ScheduleCard from '@/components/ScheduleCard';
-// import { Calendar } from '@/components/ui/calendar';
-// import { CarouselPlugin } from '@/components/Carousel';
 
-export default function temporaryLayout() {
+export default function TemporaryLayout() {
   const initiallySelectedDate = new Date();
   const [disabledDays, setDisabledDays] = React.useState([]);
-  React.useEffect(() => {
-    // Initialize the Holidays instance for Indonesia
-    const hd = new Holidays('ID');
+  const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
+  const [schedule, setSchedule] = React.useState([
+    {
+      title: 'Ilmu Pengetahuan Alam',
+      status: 'inactive',
+      startTime: '08:00',
+      endTime: '09:00',
+      day_of_week: 'Tuesday'
+    },
+    {
+      title: 'Bahasa Indonesia',
+      status: 'inactive',
+      startTime: '23:00',
+      endTime: '23:59',
+      day_of_week: 'Tuesday'
+    },
+    {
+      title: 'Matematika',
+      status: 'inactive',
+      startTime: '18:00',
+      endTime: '19:00',
+      day_of_week: 'Monday'
+    }
+  ]);
 
-    // Get the holidays for the current year
+  React.useEffect(() => {
+    const hd = new Holidays('ID');
     const currentYear = new Date().getFullYear();
     const holidays = hd.getHolidays(currentYear);
-
-    // Map holidays to Date objects
     const holidayDates = holidays.map((holiday) => new Date(holiday.date));
-
-    // Set the disabled days state
     setDisabledDays(holidayDates);
   }, []);
-  const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
 
-  const schedule = [
-    {
-      title: 'Meeting',
-      status: 'done',
-      time: '08:00 - 09:00'
-    },
-    {
-      title: 'Lunch',
-      status: 'ongoing',
-      time: '12:00 - 13:00'
-    },
-    {
-      title: 'Dinner',
-      status: 'inactive',
-      time: '18:00 - 19:00'
-    }
-  ];
+  React.useEffect(() => {
+    const updateScheduleStatus = () => {
+      const now = new Date();
+      const currentDateString = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const updatedSchedule = schedule.map((item) => {
+        const currentDate = new Date(currentDateString);
+        const itemDate = new Date(selectedDate);
+        const itemDayOfWeek = itemDate.toLocaleDateString('en-US', { weekday: 'long' });
+
+        if (item.day_of_week === itemDayOfWeek && currentDate.toDateString() === itemDate.toDateString()) {
+          if (currentTime === '00:00') {
+            return { ...item, status: 'inactive' };
+          } else if (currentTime > item.endTime) {
+            return { ...item, status: 'done' };
+          } else if (currentTime >= item.startTime && currentTime <= item.endTime) {
+            return { ...item, status: 'ongoing' };
+          }
+        }
+        return item;
+      });
+
+      setSchedule(updatedSchedule);
+    };
+
+    const interval = setInterval(updateScheduleStatus, 60000);
+    updateScheduleStatus();
+
+    return () => clearInterval(interval);
+  }, [schedule, selectedDate]);
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -51,13 +81,21 @@ export default function temporaryLayout() {
         <main className="flex bg-Gray-50">
           <div className="flex flex-col flex-auto">
             <Navbar />
-            <div className="flex justify-between px-4 py-4">
-              <div>Carousel{/* <CarouselPlugin /> */}</div>
+            <div className="flex justify-between h-screen px-4 py-4">
+              <div>{/* <CarouselPlugin /> */}</div>
               <div className="px-3 py-6 rounded-xl bg-Base-white">
                 <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} showOutsideDays disabled={disabledDays} />
                 <h1 className="pt-5 pl-6 font-semibold">{selectedDate.toDateString()}</h1>
                 {schedule.map((item, index) => (
-                  <ScheduleCard key={index} title={item.title} status={item.status} time={item.time} className="mt-5" />
+                  <ScheduleCard
+                    key={index}
+                    title={item.title}
+                    status={item.status}
+                    startTime={item.startTime}
+                    endTime={item.endTime}
+                    day={item.day_of_week === selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
+                    className="mt-5"
+                  />
                 ))}
               </div>
             </div>

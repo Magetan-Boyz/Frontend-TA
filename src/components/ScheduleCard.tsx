@@ -7,23 +7,26 @@ type ScheduleCardProps = {
   className?: string;
   title: string;
   status: string;
-  time: string;
+  startTime: string;
+  endTime: string;
+  day: boolean;
 };
 
-export default function ScheduleCard({ className, title, status, time }: ScheduleCardProps) {
+export default function ScheduleCard({ className, title, status, startTime, endTime, day }: ScheduleCardProps) {
   return (
     <div
       className={clsxm(
         'flex p-4 bg-Base-white rounded-xl border-2 justify-between items-center',
         status === 'done' ? 'border-Success-500 bg-Success-50' : status === 'ongoing' ? 'border-[#F9F546] bg-[#FFFFF1]' : 'border-Gray-300',
+        day ? '' : 'hidden',
         className
       )}
     >
       <div className="flex flex-col">
         <h1 className="font-semibold">{title}</h1>
         <p className="text-sm text-Gray-500">
-          <MdAccessTime className="inline-block mr-1" />
-          {time}
+          <MdAccessTime className="inline-block mr-1 text-xl" />
+          {startTime} - {endTime}
         </p>
       </div>
       <LuCheckCircle2

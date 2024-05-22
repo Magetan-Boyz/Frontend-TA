@@ -5,16 +5,19 @@ type SubMenuProps = {
   item: {
     title: string;
     path: string;
-    icon: string;
-    iconClosed: string;
-    iconOpened: string;
-    subNav?: string[];
+    icon: React.ReactNode;
+    iconClosed?: React.ReactNode;
+    iconOpened?: React.ReactNode;
+    subNav?: {
+      title: string;
+      path: string;
+      icon: React.ReactNode;
+    }[];
   };
 };
 
 const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
   const [subnav, setSubnav] = useState(false);
-  const [click, setClick] = useState(false);
   const router = useRouter();
 
   const handleClick = () => {
@@ -23,12 +26,12 @@ const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
     } else {
       setSubnav(!subnav);
     }
-    setClick(!click);
   };
-  const handleClickSub = () => {
-    router.push(item.path);
+
+  const handleClickSub = (path: string) => {
+    router.push(path);
+    router.reload();
   };
-  // const showSubnav = () => setSubnav(!subnav);
 
   return (
     <>
@@ -40,18 +43,16 @@ const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
         </button>
       </div>
       {subnav &&
-        item.subNav.map((item, index) => {
-          return (
-            <button
-              key={index}
-              className="flex items-center w-full gap-4 font-medium rounded-md hover:bg-Gray-50 text-md h-[40px]"
-              onClick={handleClickSub}
-            >
-              <div>{item.icon}</div>
-              <div>{item.title}</div>
-            </button>
-          );
-        })}
+        item.subNav?.map((subItem, index) => (
+          <button
+            key={index}
+            className="flex items-center w-full gap-4 font-medium rounded-md hover:bg-Gray-50 text-md h-[40px]"
+            onClick={() => handleClickSub(subItem.path)}
+          >
+            <div>{subItem.icon}</div>
+            <div>{subItem.title}</div>
+          </button>
+        ))}
     </>
   );
 };

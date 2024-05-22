@@ -17,19 +17,19 @@ export const SidebarData = [
   },
   {
     title: 'Kehadiran',
-    path: '/kehadiran/checklist',
+    path: '/kehadiran/',
     icon: <FiLayers />,
     iconClosed: <RiArrowDownSLine />,
     iconOpened: <RiArrowUpSLine />,
     subNav: [
       {
         title: 'Checklist Kehadiran',
-        path: '/kehadiran/checklist',
+        path: '/checklistKehadiran',
         icon: <GoDotFill />
       },
       {
         title: 'Agenda Hari Ini',
-        path: '/kehadiran/agenda',
+        path: '/kehadiran/checklistKehadiran',
         icon: <GoDotFill />
       }
     ]
