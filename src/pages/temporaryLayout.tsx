@@ -16,14 +16,14 @@ export default function TemporaryLayout() {
       status: 'inactive',
       startTime: '08:00',
       endTime: '09:00',
-      day_of_week: 'Tuesday'
+      day_of_week: 'Wednesday'
     },
     {
       title: 'Bahasa Indonesia',
       status: 'inactive',
       startTime: '23:00',
       endTime: '23:59',
-      day_of_week: 'Tuesday'
+      day_of_week: 'Wednesday'
     },
     {
       title: 'Matematika',
@@ -48,31 +48,31 @@ export default function TemporaryLayout() {
       const currentDateString = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      const updatedSchedule = schedule.map((item) => {
-        const currentDate = new Date(currentDateString);
-        const itemDate = new Date(selectedDate);
-        const itemDayOfWeek = itemDate.toLocaleDateString('en-US', { weekday: 'long' });
+      setSchedule((prevSchedule) =>
+        prevSchedule.map((item) => {
+          const currentDate = new Date(currentDateString);
+          const itemDate = new Date(selectedDate);
+          const itemDayOfWeek = itemDate.toLocaleDateString('en-US', { weekday: 'long' });
 
-        if (item.day_of_week === itemDayOfWeek && currentDate.toDateString() === itemDate.toDateString()) {
-          if (currentTime === '00:00') {
-            return { ...item, status: 'inactive' };
-          } else if (currentTime > item.endTime) {
-            return { ...item, status: 'done' };
-          } else if (currentTime >= item.startTime && currentTime <= item.endTime) {
-            return { ...item, status: 'ongoing' };
+          if (item.day_of_week === itemDayOfWeek && currentDate.toDateString() === itemDate.toDateString()) {
+            if (currentTime === '00:00') {
+              return { ...item, status: 'inactive' };
+            } else if (currentTime > item.endTime) {
+              return { ...item, status: 'done' };
+            } else if (currentTime >= item.startTime && currentTime <= item.endTime) {
+              return { ...item, status: 'ongoing' };
+            }
           }
-        }
-        return item;
-      });
-
-      setSchedule(updatedSchedule);
+          return item;
+        })
+      );
     };
 
     const interval = setInterval(updateScheduleStatus, 60000);
     updateScheduleStatus();
 
     return () => clearInterval(interval);
-  }, [schedule, selectedDate]);
+  }, [selectedDate]);
 
   return (
     <div>

@@ -24,12 +24,12 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Checklist Kehadiran',
-        path: '/checklistKehadiran',
+        path: '/kehadiran/checklistKehadiran',
         icon: <GoDotFill />
       },
       {
         title: 'Agenda Hari Ini',
-        path: '/kehadiran/checklistKehadiran',
+        path: '/kehadiran/agenda',
         icon: <GoDotFill />
       }
     ]

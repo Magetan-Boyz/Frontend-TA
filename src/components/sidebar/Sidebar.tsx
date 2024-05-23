@@ -5,8 +5,7 @@ import { SidebarData } from './SidebarData';
 import SubMenu from './SubMenu';
 import { LuLifeBuoy } from 'react-icons/lu';
 import { useRouter } from 'next/router';
-import { FiSettings } from 'react-icons/fi';
-import { FiLogOut } from 'react-icons/fi';
+import { FiLogOut, FiSettings } from 'react-icons/fi';
 
 export default function Sidebar() {
   const router = useRouter();

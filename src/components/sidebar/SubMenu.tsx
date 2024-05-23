@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 type SubMenuProps = {
@@ -20,6 +20,18 @@ const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
   const [subnav, setSubnav] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setSubnav(false); // Reset subnav when route changes if needed
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChange);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router]);
+
   const handleClick = () => {
     if (item.title === 'Dashboard') {
       router.push(item.path);
@@ -30,7 +42,6 @@ const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
 
   const handleClickSub = (path: string) => {
     router.push(path);
-    router.reload();
   };
 
   return (

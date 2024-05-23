@@ -1,11 +1,13 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import Navbar from '@/components/Navbar';
+import { useRouter } from 'next/router';
 import Seo from '@/components/Seo';
 import { FiEdit } from 'react-icons/fi';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Tag, TagLabel, Input, Select, Button } from '@chakra-ui/react';
 
 export default function ChecklistKehadiran() {
+  const router = useRouter();
   const user = [
     {
       name: 'John Doe',
@@ -30,6 +32,8 @@ export default function ChecklistKehadiran() {
     }
   ];
 
+  const countUser = user.length;
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -43,7 +47,7 @@ export default function ChecklistKehadiran() {
                   <h1 className="flex items-center gap-2 text-lg font-semibold">
                     Daftar siswa{' '}
                     <Tag colorScheme="blue" borderRadius="full" size="sm">
-                      <TagLabel>20 Siswa</TagLabel>
+                      <TagLabel>{countUser} User</TagLabel>
                     </Tag>
                   </h1>
                   <div className="flex items-center gap-2">
@@ -53,7 +57,15 @@ export default function ChecklistKehadiran() {
                       <option value="2">XI</option>
                       <option value="3">XII</option>
                     </Select>
-                    <Button colorScheme="gray" variant="outline" size="md" leftIcon={<FiEdit />} paddingLeft={8} paddingRight={8}>
+                    <Button
+                      colorScheme="gray"
+                      variant="outline"
+                      size="md"
+                      leftIcon={<FiEdit />}
+                      paddingLeft={8}
+                      paddingRight={8}
+                      onClick={() => router.push('/kehadiran/editKehadiran')}
+                    >
                       Edit
                     </Button>
                   </div>
