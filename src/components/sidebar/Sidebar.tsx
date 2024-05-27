@@ -15,8 +15,8 @@ export default function Sidebar() {
     router.push('/support');
   };
   return (
-    <div className="z-50 w-[272px] h-screen">
-      <div className="fixed z-50 flex flex-col w-[272px] overflow-x-auto items-center h-screen py-8 bg-white">
+    <div className="h-screen w-[272px]">
+      <div className="fixed w-[272px] flex flex-col items-center h-screen py-8 overflow-x-auto bg-white">
         <div className="flex items-center justify-center gap-2">
           <Image src={Logo} alt="Logo" width={32} />
           <h1 className="font-semibold">SMPN 1 Magetan</h1>

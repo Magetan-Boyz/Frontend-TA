@@ -16,14 +16,14 @@ export default function TemporaryLayout() {
       status: 'inactive',
       startTime: '08:00',
       endTime: '09:00',
-      day_of_week: 'Wednesday'
+      day_of_week: 'Friday'
     },
     {
       title: 'Bahasa Indonesia',
       status: 'inactive',
       startTime: '23:00',
       endTime: '23:59',
-      day_of_week: 'Wednesday'
+      day_of_week: 'Friday'
     },
     {
       title: 'Matematika',

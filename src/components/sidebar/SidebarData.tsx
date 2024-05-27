@@ -36,14 +36,14 @@ export const SidebarData = [
   },
   {
     title: 'Tugas',
-    path: '/kehadiran/checklist',
+    path: '/tugas',
     icon: <LuCopyCheck />,
     iconClosed: <RiArrowDownSLine />,
     iconOpened: <RiArrowUpSLine />,
     subNav: [
       {
         title: 'Preview Tugas',
-        path: '/kehadiran/checklist',
+        path: '/tugas/preview',
         icon: <GoDotFill />
       },
       {
