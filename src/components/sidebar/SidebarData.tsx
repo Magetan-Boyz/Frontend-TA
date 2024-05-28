@@ -62,7 +62,7 @@ export const SidebarData = [
     subNav: [
       {
         title: 'List Nilai',
-        path: '/tugas/previewtugas',
+        path: '/nilai/list',
         icon: <GoDotFill />
       },
       {
