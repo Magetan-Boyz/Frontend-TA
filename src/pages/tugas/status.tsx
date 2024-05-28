@@ -4,22 +4,27 @@ import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { Input, Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
+import { useRouter } from 'next/router';
 
 export default function statusPengumpulan() {
+  const router = useRouter();
   const [tugas] = React.useState([
     {
+      id: 1,
       nama: 'Tugas 1',
       deskripsi: 'Bab Pembahasan : Belajar Mengenai Fotosintesis',
       totalSiswa: '10',
       totalSubmit: '9'
     },
     {
+      id: 2,
       nama: 'Tugas 2',
       deskripsi: 'Bab Pembahasan : Belajar Mengenai Fotosintesis',
       totalSiswa: '10',
       totalSubmit: '9'
     },
     {
+      id: 3,
       nama: 'Tugas 3',
       deskripsi: 'Bab Pembahasan : Belajar Mengenai Fotosintesis',
       totalSiswa: '10',
@@ -98,7 +103,9 @@ export default function statusPengumpulan() {
                           <Td>{item.totalSiswa}</Td>
                           <Td>{item.totalSubmit}</Td>
                           <Td>
-                            <SecondaryButton btnClassName="font-semibold">Detail</SecondaryButton>
+                            <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/status/${item.id}`)}>
+                              Detail
+                            </SecondaryButton>
                           </Td>
                         </Tr>
                       ))}
