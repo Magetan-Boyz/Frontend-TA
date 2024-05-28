@@ -36,7 +36,7 @@ export default function PreviewTugas() {
           <div className="flex flex-col flex-auto">
             <Navbar />
             <div className="flex justify-center h-screen p-10">
-              <div className="w-full h-full p-3 rounded-md shadow-lg bg-Base-white" ref={calendarContainerRef}>
+              <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white" ref={calendarContainerRef}>
                 <DayPicker
                   mode="multiple"
                   selected={selectedDates}

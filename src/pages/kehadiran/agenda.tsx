@@ -13,7 +13,7 @@ export default function Agenda() {
         <main className="flex bg-Gray-50">
           <div className="flex flex-col flex-auto">
             <Navbar />
-            <div className="flex justify-center h-screen p-10">
+            <div className="flex justify-center p-10 h-fit">
               <div className="w-full h-full p-3 rounded-md shadow-lg bg-Base-white">
                 <AgendaCalendar />
               </div>

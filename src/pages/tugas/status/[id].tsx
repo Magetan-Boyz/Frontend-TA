@@ -46,7 +46,7 @@ export default function Status() {
           <div className="flex flex-col flex-auto">
             <Navbar />
             <div className="flex justify-center h-screen p-10">
-              <div className="w-full h-full p-3 rounded-md shadow-lg bg-Base-white">
+              <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
                 <div className="flex justify-between p-3 border-b border-Gray-200">
                   <h1 className="text-lg font-semibold">Status Pengumpulan</h1>
                   <div className="flex gap-7">

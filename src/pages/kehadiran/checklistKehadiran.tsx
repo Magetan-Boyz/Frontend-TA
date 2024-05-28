@@ -42,7 +42,7 @@ export default function ChecklistKehadiran() {
           <div className="flex flex-col flex-auto">
             <Navbar />
             <div className="flex justify-center h-screen p-10">
-              <div className="w-full h-full rounded-md shadow-lg bg-Base-white">
+              <div className="w-full rounded-md shadow-lg h-fit bg-Base-white">
                 <div className="flex items-center justify-between p-4">
                   <h1 className="flex items-center gap-2 text-lg font-semibold">
                     Daftar siswa{' '}
