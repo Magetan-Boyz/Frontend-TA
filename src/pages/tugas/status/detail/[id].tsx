@@ -10,10 +10,10 @@ export default function DetailTugas() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Detail Tugas" />
-        <main className="flex bg-Gray-50">
+        <main className="flex h-fit bg-Gray-50 w-fit lg:w-full">
           <div className="flex flex-col flex-auto">
             <Navbar />
-            <div className="flex justify-center h-screen p-10">
+            <div className="flex justify-center p-10 h-fit">
               <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
                 <div className="flex justify-between p-3 border-b border-Gray-200">
                   <h1 className="font-semibold text-Gray-900">Assignment 1</h1>

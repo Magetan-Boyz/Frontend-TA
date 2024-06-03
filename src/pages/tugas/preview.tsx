@@ -39,13 +39,13 @@ export default function PreviewTugas() {
               <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white" ref={calendarContainerRef}>
                 <DayPicker
                   mode="multiple"
+                  className="w-full"
                   selected={selectedDates}
                   onDayClick={handleDayClick}
                   disabled={disabledDays}
-                  className=""
                   styles={{
                     head_cell: {
-                      width: `${calendarContainerRef.current?.parentElement ?? 0}px`
+                      width: `${calendarContainerRef.current?.clientWidth ?? 0}px`
                     },
                     table: {
                       maxWidth: 'none'

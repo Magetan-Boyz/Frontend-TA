@@ -60,7 +60,7 @@ export default function NilaiList() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Nilai" />
-        <main className="flex bg-Gray-50">
+        <main className="flex h-screen bg-Gray-50 w-fit lg:w-full">
           <div className="flex flex-col flex-auto">
             <Navbar />
             <div className="flex flex-col justify-start h-screen p-10 gap-9">
@@ -123,7 +123,7 @@ export default function NilaiList() {
                           <Td>{item.ratasumatif}</Td>
                           <Td>{item.rataproyek}</Td>
                           <Td>
-                            <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/status/${item.id}`)}>
+                            <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/nilai/detail/${item.id}`)}>
                               Detail
                             </SecondaryButton>
                           </Td>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Logo from '../../../public/logo-smp.png';
 import Image from 'next/image';
 import { SidebarData } from './SidebarData';
@@ -6,6 +6,7 @@ import SubMenu from './SubMenu';
 import { LuLifeBuoy } from 'react-icons/lu';
 import { useRouter } from 'next/router';
 import { FiLogOut, FiSettings } from 'react-icons/fi';
+import { RiMenu2Line } from 'react-icons/ri';
 
 export default function Sidebar() {
   const router = useRouter();
@@ -14,14 +15,28 @@ export default function Sidebar() {
   const handleClick = () => {
     router.push('/support');
   };
+
+  // State to manage sidebar visibility
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
-    <div className="h-screen w-[272px]">
-      <div className="fixed w-[272px] flex flex-col items-center h-screen py-8 overflow-x-auto bg-white">
-        <div className="flex items-center justify-center gap-2">
-          <Image src={Logo} alt="Logo" width={32} />
-          <h1 className="font-semibold">SMPN 1 Magetan</h1>
+    <div className="h-fit lg:w-[272px]">
+      <div className="lg:fixed lg:w-[272px] flex flex-col lg:items-center h-fit py-8 overflow-x-auto bg-white">
+        <div className="flex justify-between px-7 lg:items-center lg:justify-center">
+          <div className="flex gap-2 lg:items-center lg:justify-center">
+            <Image src={Logo} alt="Logo" width={32} />
+            <h1 className="font-semibold">Nama SMP</h1>
+          </div>
+          <button className="lg:hidden" onClick={toggleSidebar}>
+            <RiMenu2Line className="text-3xl" />
+          </button>
         </div>
-        <div className="place-content-between">
+        <div id="sidebar" className={`lg:block place-content-between ${sidebarVisible ? 'block' : 'hidden'}`}>
           <div className="flex flex-col items-start flex-auto w-full gap-2 px-4 py-10">
             {SidebarData.map((item, index) => {
               return <SubMenu item={item} key={index} />;

@@ -10,7 +10,7 @@ export default function Agenda() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <main className="flex bg-Gray-50">
+        <main className="flex bg-Gray-50 w-fit lg:w-full">
           <div className="flex flex-col flex-auto">
             <Navbar />
             <div className="flex justify-center p-10 h-fit">
