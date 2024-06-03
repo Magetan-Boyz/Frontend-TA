@@ -1,6 +1,6 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { DayPicker, DayMouseEventHandler } from 'react-day-picker';
 import Holidays from 'date-holidays';
@@ -32,34 +32,27 @@ export default function PreviewTugas() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <main className="flex bg-Gray-50">
-          <div className="flex flex-col flex-auto">
-            <Navbar />
-            <div className="flex justify-center h-screen p-10">
-              <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white" ref={calendarContainerRef}>
-                <DayPicker
-                  mode="multiple"
-                  className="w-full"
-                  selected={selectedDates}
-                  onDayClick={handleDayClick}
-                  disabled={disabledDays}
-                  styles={{
-                    head_cell: {
-                      width: `${calendarContainerRef.current?.clientWidth ?? 0}px`
-                    },
-                    table: {
-                      maxWidth: 'none'
-                    },
-                    day: {
-                      width: '',
-                      margin: 'auto'
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </main>
+        <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white" ref={calendarContainerRef}>
+          <DayPicker
+            mode="multiple"
+            className="w-full"
+            selected={selectedDates}
+            onDayClick={handleDayClick}
+            disabled={disabledDays}
+            styles={{
+              head_cell: {
+                width: `${calendarContainerRef.current?.clientWidth ?? 0}px`
+              },
+              table: {
+                maxWidth: 'none'
+              },
+              day: {
+                width: '',
+                margin: 'auto'
+              }
+            }}
+          />
+        </div>
       </AuthenticatedLayout>
     </div>
   );

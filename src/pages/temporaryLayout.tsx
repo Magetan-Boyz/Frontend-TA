@@ -1,10 +1,11 @@
 import * as React from 'react';
 import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar';
 import Seo from '../components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import ScheduleCard from '@/components/ScheduleCard';
+import { Carousel } from '@/components/ui/carousel';
 
 export default function TemporaryLayout() {
   const initiallySelectedDate = new Date();
@@ -78,29 +79,26 @@ export default function TemporaryLayout() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <main className="flex bg-Gray-50">
-          <div className="flex flex-col flex-auto">
-            <Navbar />
-            <div className="flex justify-between h-screen px-4 py-4">
-              <div>{/* <CarouselPlugin /> */}</div>
-              <div className="px-3 py-6 rounded-xl bg-Base-white">
-                <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} showOutsideDays disabled={disabledDays} />
-                <h1 className="pt-5 pl-6 font-semibold">{selectedDate.toDateString()}</h1>
-                {schedule.map((item, index) => (
-                  <ScheduleCard
-                    key={index}
-                    title={item.title}
-                    status={item.status}
-                    startTime={item.startTime}
-                    endTime={item.endTime}
-                    day={item.day_of_week === selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
-                    className="mt-5"
-                  />
-                ))}
-              </div>
-            </div>
+        <div className="flex justify-between">
+          <div>
+            <Carousel />
           </div>
-        </main>
+          <div className="px-3 py-6 rounded-xl bg-Base-white">
+            <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} showOutsideDays disabled={disabledDays} />
+            <h1 className="pt-5 pl-6 font-semibold">{selectedDate.toDateString()}</h1>
+            {schedule.map((item, index) => (
+              <ScheduleCard
+                key={index}
+                title={item.title}
+                status={item.status}
+                startTime={item.startTime}
+                endTime={item.endTime}
+                day={item.day_of_week === selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
+                className="mt-5"
+              />
+            ))}
+          </div>
+        </div>
       </AuthenticatedLayout>
     </div>
   );

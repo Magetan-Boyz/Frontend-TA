@@ -26,7 +26,7 @@ export default function Sidebar() {
 
   return (
     <div className="h-fit lg:w-[272px]">
-      <div className="lg:fixed lg:w-[272px] flex flex-col lg:items-center h-fit py-8 overflow-x-auto bg-white">
+      <div className="lg:sticku lg:w-[272px] flex flex-col lg:items-center h-fit py-8 overflow-x-auto bg-white">
         <div className="flex justify-between px-7 lg:items-center lg:justify-center">
           <div className="flex gap-2 lg:items-center lg:justify-center">
             <Image src={Logo} alt="Logo" width={32} />
