@@ -1,6 +1,6 @@
 import React from 'react';
 import { HiOutlineChartSquareBar } from 'react-icons/hi';
-import { FiLayers } from 'react-icons/fi';
+import { FiLayers, FiBook } from 'react-icons/fi';
 import { RiArrowDownSLine } from 'react-icons/ri';
 import { RiArrowUpSLine } from 'react-icons/ri';
 import { LuCopyCheck } from 'react-icons/lu';
@@ -54,6 +54,25 @@ export const SidebarData = [
       {
         title: 'Literasi',
         path: '/tugas/literasi',
+        icon: <GoDotFill />
+      }
+    ]
+  },
+  {
+    title: 'Materi',
+    path: '/materi',
+    icon: <FiBook />,
+    iconClosed: <RiArrowDownSLine />,
+    iconOpened: <RiArrowUpSLine />,
+    subNav: [
+      {
+        title: 'Preview Materi',
+        path: '/materi/preview',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Susun Materi',
+        path: '/materi/susun',
         icon: <GoDotFill />
       }
     ]

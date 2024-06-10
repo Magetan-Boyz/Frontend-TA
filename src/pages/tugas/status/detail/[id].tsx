@@ -38,30 +38,32 @@ export default function DetailTugas() {
             </button>
             <h1 className="text-sm font-semibold text-Gray-600">Evaluasi</h1>
             <table className="border-separate border-spacing-y-6">
-              <tr className="">
-                <td className="">
-                  <h1 className="text-sm font-semibold text-Gray-600">Point</h1>
-                </td>
-                <td className="flex flex-col gap-4 lg:items-center lg:flex-row">
-                  <input type="number" className="p-2 border rounded-lg w-fit h-fit" />
-                  <h1 className="text-sm text-Gray-500">Evaluasi tugas ini dengan nilai antara 0 sampai 50</h1>
-                </td>
-              </tr>
-              <tr>
-                <td className="">
-                  <h1 className="text-sm font-semibold text-Gray-600">Feedback</h1>
-                </td>
-                <td>
-                  <textarea name="" className="p-2 border rounded-lg" id=""></textarea>
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <PrimaryButton btnClassName="">Beri Nilai Tugas Ini</PrimaryButton>
-                </td>
-                <td></td>
-              </tr>
+              <tbody>
+                <tr className="">
+                  <td className="">
+                    <h1 className="text-sm font-semibold text-Gray-600">Point</h1>
+                  </td>
+                  <td className="flex flex-col gap-4 lg:items-center lg:flex-row">
+                    <input type="number" className="p-2 border rounded-lg w-fit h-fit" />
+                    <h1 className="text-sm text-Gray-500">Evaluasi tugas ini dengan nilai antara 0 sampai 50</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="">
+                    <h1 className="text-sm font-semibold text-Gray-600">Feedback</h1>
+                  </td>
+                  <td>
+                    <textarea name="" className="p-2 border rounded-lg" id=""></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <PrimaryButton btnClassName="">Beri Nilai Tugas Ini</PrimaryButton>
+                  </td>
+                  <td></td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>

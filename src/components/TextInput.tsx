@@ -34,9 +34,7 @@ export default function TextInput({
       onKeyDown={onKeyDown as React.KeyboardEventHandler<HTMLInputElement> | undefined}
       autoComplete={autoComplete || 'off'}
       {...rest}
-      className={clsxm(
-        inputClassName ? inputClassName : 'w-full rounded-lg border-Gray-300 border-2 shadow py-[10px] px-[14px] placeholder:text-Gray-500'
-      )}
+      className={clsxm('w-full rounded-lg border-Gray-300 border-2 shadow py-[10px] px-[14px] placeholder:text-Gray-500', inputClassName)}
     />
   );
 }
