@@ -35,7 +35,7 @@ export default function ChecklistKehadiran() {
   const countUser = user.length;
 
   return (
-    <div>
+    <div className="overflow-x-auto">
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
         <div className="w-full rounded-md shadow-lg h-fit bg-Base-white">
@@ -66,8 +66,8 @@ export default function ChecklistKehadiran() {
               </Button>
             </div>
           </div>
-          <div className="w-full overflow-x-auto">
-            <TableContainer>
+          <div className="">
+            <TableContainer className="">
               <Table variant="simple" className="">
                 <Thead>
                   <Tr>

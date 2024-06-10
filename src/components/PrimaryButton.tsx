@@ -32,7 +32,7 @@ export default function PrimaryButton({
       disabled={disabled}
       onClick={onClick || undefined}
       className={clsxm(
-        'cursor-pointer flex w-full items-center justify-center gap-1 bg-Primary-500 text-center font-medium text-Base-white transition-all duration-300 disabled:bg-lighter-gray disabled:text-dark/60',
+        'cursor-pointer flex w-full items-center justify-center gap-1 bg-Primary-500 text-center font-medium text-Base-white transition-all duration-300 disabled:bg-lighter-gray disabled:text-dark/60 whitespace-nowrap',
         size && size == 'mini' ? 'py-2 px-4 text-sm' : 'py-3 px-4',
         rounded ? 'rounded-full' : 'rounded-xl',
         btnClassName

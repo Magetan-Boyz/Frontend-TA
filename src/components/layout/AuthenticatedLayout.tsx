@@ -9,10 +9,10 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     <div className="lg:flex">
       <Sidebar />
       <div className="flex-auto">
-        <main className="flex h-screen bg-Gray-50 w-fit lg:w-full">
+        <main className="flex h-full bg-Gray-50 w-fit lg:w-full">
           <div className="flex flex-col flex-auto">
             <Navbar />
-            <div className="flex flex-col h-screen gap-8 p-10 overflow-x-auto">{children}</div>
+            <div className="flex flex-col gap-8 h-fit lg:p-10">{children}</div>
           </div>
         </main>
       </div>
