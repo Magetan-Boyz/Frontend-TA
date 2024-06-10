@@ -7,8 +7,10 @@ import { Avatar, AvatarGroup, Button, Select, Radio, RadioGroup, Stack } from '@
 import { MdAdd } from 'react-icons/md';
 import { FiUploadCloud, FiTrash2 } from 'react-icons/fi';
 import TextInput from '@/components/TextInput';
+import { useRouter } from 'next/router';
 
 export default function CreateMateri() {
+  const router = useRouter();
   const [files, setFiles] = React.useState<FileList | null>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -115,7 +117,7 @@ export default function CreateMateri() {
             <Button leftIcon={<FiTrash2 />} colorScheme="gray" variant="outline">
               Hapus Materi
             </Button>
-            <PrimaryButton btnClassName="w-fit h-fit" onClick={() => console.log('Submit')}>
+            <PrimaryButton btnClassName="w-fit h-fit" onClick={() => router.push('/materi/edit')}>
               Buat Materi
             </PrimaryButton>
           </div>
