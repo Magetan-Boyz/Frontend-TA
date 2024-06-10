@@ -50,6 +50,11 @@ export const SidebarData = [
         title: 'Status Pengumpulan',
         path: '/tugas/status',
         icon: <GoDotFill />
+      },
+      {
+        title: 'Literasi',
+        path: '/tugas/literasi',
+        icon: <GoDotFill />
       }
     ]
   },

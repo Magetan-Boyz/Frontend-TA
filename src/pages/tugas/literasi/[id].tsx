@@ -2,46 +2,44 @@ import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 // import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel } from '@chakra-ui/react';
+import { Select, Table, Thead, Tr, Tbody, Th, Td } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
-export default function Status() {
+export default function DetailPengumpulanLiterasi() {
   const router = useRouter();
   const [user] = React.useState([
     {
       id: 1,
       nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
       email: 'dominica@gmail.com',
+      judul: 'Judul Literasi',
       totalpoint: '10',
-      status: 'Pass',
-      nis: '1234567890'
+      catatan: 'Pass'
     },
     {
       id: 2,
       nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
       email: 'dominica@gmail.com',
-      totalpoint: '10',
-      status: 'Pending',
-      nis: '1234567890'
+      judul: 'Judul Literasi',
+      totalpoint: '-',
+      catatan: 'Pending'
     },
     {
       id: 3,
       nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
       email: 'dominica@gmail.com',
+      judul: 'Judul Literasi',
       totalpoint: '10',
-      status: 'Pending',
-      nis: '1234567890'
+      catatan: 'Pending'
     }
   ]);
+
   return (
     <div>
       <AuthenticatedLayout>
-        <Seo templateTitle="Status" />
+        <Seo templateTitle="Literasi" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">Detail Pengumpulan</h1>
@@ -71,18 +69,16 @@ export default function Status() {
             <Table className="">
               <Thead className="bg-Gray-50">
                 <Tr>
-                  <Th>Tanggal</Th>
                   <Th>Nama Siswa</Th>
-                  <Th>NIS</Th>
+                  <Th>Judul Literasi</Th>
                   <Th>Total Point</Th>
-                  <Th>Status Submit</Th>
+                  <Th>Catatan Guru</Th>
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {user.map((item, index) => (
                   <Tr key={index}>
-                    <Td className="text-sm text-Gray-900">{item.tanggal}</Td>
                     <Td className="flex gap-2">
                       <Image
                         src={`https://ui-avatars.com/api/?name=${item.nama}`}
@@ -96,26 +92,12 @@ export default function Status() {
                         <span className="text-sm text-Gray-600">{item.email}</span>
                       </div>
                     </Td>
-                    <Td className="text-sm text-Gray-900">{item.nis}</Td>
+                    <Td className="text-sm text-Gray-900">{item.judul}</Td>
                     <Td className="text-sm text-Gray-900">{item.totalpoint}/50</Td>
+                    <Td>{item.catatan}</Td>
                     <Td>
-                      {item.status === 'Pending' ? (
-                        <Tag colorScheme="blue" borderRadius="full" size="sm">
-                          <TagLabel>Pending</TagLabel>
-                        </Tag>
-                      ) : item.status === 'Pass' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Pass</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Fail</TagLabel>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/status/detail/${item.id}`)}>
-                        {item.status === 'Pending' ? 'Evaluate' : 'Detail'}
+                      <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/literasi/detail/${item.id}`)}>
+                        {item.totalpoint === '-' || item.totalpoint === '0' ? 'Evaluate' : 'Detail'}
                       </SecondaryButton>
                     </Td>
                   </Tr>

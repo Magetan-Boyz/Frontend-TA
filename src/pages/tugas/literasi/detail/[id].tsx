@@ -5,7 +5,7 @@ import Seo from '@/components/Seo';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import PrimaryButton from '@/components/PrimaryButton';
 
-export default function DetailTugas() {
+export default function DetailLiterasi() {
   return (
     <div>
       <AuthenticatedLayout>
@@ -16,17 +16,14 @@ export default function DetailTugas() {
           </div>
           <div className="flex flex-col gap-10 p-5 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="font-semibold text-Gray-600">
-              <span className="font-medium text-Gray-500">Deadline Pengumpulan :</span> January 6, 2023 11:59 AM
+              <span className="font-medium text-Gray-500">Tanggal Literasi :</span> January 6, 2023 11:59 AM
             </h1>
             <h1 className="font-semibold text-Gray-600">
               <span className="font-medium text-Gray-500">Nama Siswa :</span> Dominica
             </h1>
-            <h1 className="font-semibold text-Gray-600">
-              <span className="font-medium text-Gray-500">Bab Pembahasan :</span> Belajar Mengenai Fotosintesis
-            </h1>
           </div>
           <div className="flex flex-col gap-5 p-5">
-            <h1 className="text-sm font-semibold text-Gray-600">Deskripsi Tugas</h1>
+            <h1 className="text-sm font-semibold text-Gray-600">Rangkuman Literasi</h1>
             <div className="w-full p-3 text-sm font-medium border rounded-lg h-fit text-Gray-500">This is Description</div>
             <h1 className="text-sm font-semibold text-Gray-600">File(s) Tugas</h1>
             <button className="flex gap-3 p-4 border rounded-lg w-fit h-fit">

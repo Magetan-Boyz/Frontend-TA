@@ -6,7 +6,7 @@ import SecondaryButton from './SecondaryButton';
 
 export default function Navbar() {
   return (
-    <div className="flex items-center justify-between w-full py-4 pl-2 pr-8 bg-Base-white">
+    <div className="flex items-center justify-between w-screen py-4 pl-2 pr-8 lg:w-full bg-Base-white">
       <div className="flex items-center text-xl font-semibold">Dashboard</div>
       <div className="flex items-center gap-5 text-4xl font-semibold">
         <FiSearch />
