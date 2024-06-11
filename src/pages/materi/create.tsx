@@ -11,13 +11,12 @@ import { useRouter } from 'next/router';
 
 export default function CreateMateri() {
   const router = useRouter();
-  const [files, setFiles] = React.useState<FileList | null>(null);
+  const [files, setFiles] = React.useState<string | null>(null);
 
-  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    const selectedFiles = e.target.files[0];
+  const handleDragOver = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
     if (selectedFiles) {
-      setFiles(selectedFiles.name);
+      setFiles(selectedFiles[0].name);
     }
   };
 
