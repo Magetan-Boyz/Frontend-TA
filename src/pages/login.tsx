@@ -1,12 +1,12 @@
 import * as React from 'react';
-import Checkbox from '../components/Checkbox';
-import PrimaryButton from '../components/PrimaryButton';
-import TextInput from '../components/TextInput';
-import Layout from '../components/layout/Layout';
+import Checkbox from '@/components/Checkbox';
+import PrimaryButton from '@/components/PrimaryButton';
+import TextInput from '@/components/TextInput';
+import Layout from '@/components/layout/Layout';
 // import HeadTag from '../components/HeadTag';
-import Seo from '../components/Seo';
-import Section from '../../public/Section.png';
-import Logo from '../../public/logo-smp.png';
+import Seo from '@/components/Seo';
+import Section from '~/Section.png';
+import Logo from '~/logo-smp.png';
 import Image from 'next/image';
 import axios from 'axios';
 

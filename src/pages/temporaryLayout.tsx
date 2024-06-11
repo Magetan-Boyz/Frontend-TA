@@ -1,7 +1,7 @@
 import * as React from 'react';
-import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 // import Navbar from '../components/Navbar';
-import Seo from '../components/Seo';
+import Seo from '@/components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import ScheduleCard from '@/components/ScheduleCard';

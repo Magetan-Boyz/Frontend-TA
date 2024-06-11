@@ -1,10 +1,10 @@
 import { NextPage } from 'next';
 import React from 'react';
-import Seo from '../components/Seo';
+import Seo from '@/components/Seo';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import Logo from '../../public/logo-smp.png';
-import PrimaryButton from '../components/PrimaryButton';
+import Logo from '~/logo-smp.png';
+import PrimaryButton from '@/components/PrimaryButton';
 
 const Index: NextPage = () => {
   const router = useRouter();
