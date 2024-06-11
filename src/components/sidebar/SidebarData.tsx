@@ -124,22 +124,27 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Data Diri Siswa',
-        path: '/tugas/previewtugas',
+        path: '/pengaturan/datadiri',
         icon: <GoDotFill />
       },
       {
         title: 'Konseling',
-        path: '/tugas/status',
+        path: '/pengaturan/konseling',
         icon: <GoDotFill />
       },
       {
         title: 'Dispensasi',
-        path: '/tugas/status',
+        path: '/pengaturan/dispensasi',
         icon: <GoDotFill />
       },
       {
         title: 'Logbook Pelanggaran',
-        path: '/tugas/status',
+        path: '/pengaturan/logbook',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Pengaduan',
+        path: '/pengaturan/pengaduan',
         icon: <GoDotFill />
       }
     ]
