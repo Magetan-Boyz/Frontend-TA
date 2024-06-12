@@ -2,35 +2,37 @@ import * as React from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Image from 'next/image';
+import carousel2 from '~/carousel2.jpeg';
 
-export default function CarouselPlugin() {
+export default function Carousel() {
   const settings = {
-    dots: true,
+    autoplay: true,
+    arrows: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1
   };
   return (
-    <Slider {...settings}>
-      <div>
-        <h3>1</h3>
-      </div>
-      <div>
-        <h3>2</h3>
-      </div>
-      <div>
-        <h3>3</h3>
-      </div>
-      <div>
-        <h3>4</h3>
-      </div>
-      <div>
-        <h3>5</h3>
-      </div>
-      <div>
-        <h3>6</h3>
-      </div>
-    </Slider>
+    <div className="carousel-container">
+      <Slider {...settings}>
+        <div className="rounded-xl">
+          <Image src={carousel2.src} alt="carousel" width={carousel2.width} height={carousel2.height} />
+        </div>
+        <div className="rounded-xl">
+          <Image src={carousel2.src} alt="carousel" width={carousel2.width} height={carousel2.height} />
+        </div>
+        <div className="rounded-xl">
+          <Image src={carousel2.src} alt="carousel" width={carousel2.width} height={carousel2.height} />
+        </div>
+        <div className="rounded-xl">
+          <Image src={carousel2.src} alt="carousel" width={carousel2.width} height={carousel2.height} />
+        </div>
+        <div className="rounded-xl">
+          <Image src={carousel2.src} alt="carousel" width={carousel2.width} height={carousel2.height} />
+        </div>
+      </Slider>
+    </div>
   );
 }

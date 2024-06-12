@@ -16,7 +16,7 @@ export default function ScheduleCard({ className, title, status, startTime, endT
   return (
     <div
       className={clsxm(
-        'flex p-4 bg-Base-white rounded-xl border-2 justify-between items-center',
+        'flex p-4 bg-Base-white rounded-xl border-2 justify-between items-center w-full',
         status === 'done' ? 'border-Success-500 bg-Success-50' : status === 'ongoing' ? 'border-[#F9F546] bg-[#FFFFF1]' : 'border-Gray-300',
         day ? '' : 'hidden',
         className
