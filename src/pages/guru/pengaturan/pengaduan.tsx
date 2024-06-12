@@ -76,6 +76,7 @@ export default function Pengaduan() {
                   isiPengaduan={pengaduan.isiPengaduan}
                   initialLikes={pengaduan.initialLikes}
                   comments={komentarForPengaduan}
+                  id={pengaduan.id}
                   onDelete={() => handleDeletePengaduan(pengaduan.id)}
                 />
               );

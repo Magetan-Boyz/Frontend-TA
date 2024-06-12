@@ -67,6 +67,7 @@ export default function DetailPengaduan() {
                 waktu={pengaduan.waktu}
                 isiPengaduan={pengaduan.isiPengaduan}
                 initialLikes={pengaduan.initialLikes}
+                id={pengaduan.id}
                 comments={dataKomentar} // Mengirimkan data komentar sebagai props
                 onDelete={() => handleDeletePengaduan(pengaduan.id)}
               />

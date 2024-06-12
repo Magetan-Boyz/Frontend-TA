@@ -5,6 +5,8 @@ import { BiLike } from 'react-icons/bi';
 import { FaRegCommentDots } from 'react-icons/fa';
 import { FiShare2 } from 'react-icons/fi';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+import { useRouter } from 'next/router';
+
 import clsxm from '@/lib/clsxm';
 
 type CardPengaduanProps = {
@@ -13,6 +15,7 @@ type CardPengaduanProps = {
   waktu: string;
   isiPengaduan: string;
   initialLikes: number;
+  id: number;
   comments: Array<{ id: number; nama: string; waktu: string; isiKomentar: string }>;
   onDelete: () => void; // Function to handle delete
 };
@@ -25,6 +28,7 @@ export default function CardPengaduan({
   initialLikes,
   comments,
   onDelete,
+  id,
   ...rest
 }: CardPengaduanProps) {
   const [likes, setLikes] = useState(initialLikes);
@@ -39,6 +43,8 @@ export default function CardPengaduan({
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
+
+  const router = useRouter();
 
   return (
     <div className={clsxm('w-full h-fit border rounded-xl border-Gray-200 p-4', className)} {...rest}>
@@ -82,7 +88,10 @@ export default function CardPengaduan({
           <BiLike className="text-xl" />
           <span>Suka</span>
         </button>
-        <button className="flex items-center gap-1 text-sm font-semibold text-Gray-500">
+        <button
+          className="flex items-center gap-1 text-sm font-semibold text-Gray-500"
+          onClick={() => router.push(`/guru/pengaturan/pengaduan/${id}`)}
+        >
           <FaRegCommentDots className="text-xl" />
           <span>Komentar</span>
         </button>

@@ -12,7 +12,7 @@ import { GoDotFill } from 'react-icons/go';
 export const SidebarData = [
   {
     title: 'Dashboard',
-    path: '/temporaryLayout',
+    path: '/guru/home',
     icon: <HiOutlineChartSquareBar />
   },
   {
@@ -24,12 +24,12 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Checklist Kehadiran',
-        path: '/kehadiran/checklistKehadiran',
+        path: '/guru/kehadiran/checklistKehadiran',
         icon: <GoDotFill />
       },
       {
         title: 'Agenda Hari Ini',
-        path: '/kehadiran/agenda',
+        path: '/guru/kehadiran/agenda',
         icon: <GoDotFill />
       }
     ]
@@ -43,17 +43,17 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Preview Tugas',
-        path: '/tugas/preview',
+        path: '/guru/tugas/preview',
         icon: <GoDotFill />
       },
       {
         title: 'Status Pengumpulan',
-        path: '/tugas/status',
+        path: '/guru/tugas/status',
         icon: <GoDotFill />
       },
       {
         title: 'Literasi',
-        path: '/tugas/literasi',
+        path: '/guru/tugas/literasi',
         icon: <GoDotFill />
       }
     ]
@@ -67,12 +67,12 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Preview Materi',
-        path: '/materi/preview',
+        path: '/guru/materi/preview',
         icon: <GoDotFill />
       },
       {
         title: 'Susun Materi',
-        path: '/materi/susun',
+        path: '/guru/materi/susun',
         icon: <GoDotFill />
       }
     ]
@@ -86,12 +86,7 @@ export const SidebarData = [
     subNav: [
       {
         title: 'List Nilai',
-        path: '/nilai/list',
-        icon: <GoDotFill />
-      },
-      {
-        title: 'Materi',
-        path: '/tugas/status',
+        path: '/guru/nilai/list',
         icon: <GoDotFill />
       }
     ]
@@ -105,12 +100,12 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Preview Tugas',
-        path: '/tugas/previewtugas',
+        path: '/guru/tugas/previewtugas',
         icon: <GoDotFill />
       },
       {
         title: 'Status Pengumpulan',
-        path: '/tugas/status',
+        path: '/guru/tugas/status',
         icon: <GoDotFill />
       }
     ]
@@ -124,27 +119,27 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Data Diri Siswa',
-        path: '/pengaturan/datadiri',
+        path: '/guru/pengaturan/datadiri',
         icon: <GoDotFill />
       },
       {
         title: 'Konseling',
-        path: '/pengaturan/konseling',
+        path: '/guru/pengaturan/konseling',
         icon: <GoDotFill />
       },
       {
         title: 'Dispensasi',
-        path: '/pengaturan/dispensasi',
+        path: '/guru/pengaturan/dispensasi',
         icon: <GoDotFill />
       },
       {
         title: 'Logbook Pelanggaran',
-        path: '/pengaturan/logbook',
+        path: '/guru/pengaturan/logbookpelanggaran',
         icon: <GoDotFill />
       },
       {
         title: 'Pengaduan',
-        path: '/pengaturan/pengaduan',
+        path: '/guru/pengaturan/pengaduan',
         icon: <GoDotFill />
       }
     ]
