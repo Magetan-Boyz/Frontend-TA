@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';

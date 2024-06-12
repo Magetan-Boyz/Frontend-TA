@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 // import Navbar from '@/components/Navbar';
 import { useRouter } from 'next/router';
 import Seo from '@/components/Seo';

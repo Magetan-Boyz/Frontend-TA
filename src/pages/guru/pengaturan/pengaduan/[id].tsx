@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import CardPengaduan from '@/components/CardPengaduan';
 import KomentarPengaduan from '@/components/KomentarPengaduan';

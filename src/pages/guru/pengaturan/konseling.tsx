@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel, Input } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';

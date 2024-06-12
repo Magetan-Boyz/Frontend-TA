@@ -1,7 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import { Box, Avatar, Flex, FormControl, FormLabel, Input, Select, Text, HStack } from '@chakra-ui/react';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import PrimaryButton from '@/components/PrimaryButton';
 
