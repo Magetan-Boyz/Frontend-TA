@@ -9,7 +9,7 @@ import SummaryChart from '@/components/chart/SummaryChart';
 import { Select } from '@chakra-ui/react';
 import KehadiranChart from '@/components/chart/KehadiranChart';
 
-export default function TemporaryLayout() {
+export default function Home() {
   const initiallySelectedDate = new Date();
   const [disabledDays, setDisabledDays] = React.useState([]);
   const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
