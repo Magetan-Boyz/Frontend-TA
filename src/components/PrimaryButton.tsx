@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import clsxm from '../lib/clsxm';
 
 type PrimaryButtonProps = {
@@ -7,7 +6,7 @@ type PrimaryButtonProps = {
   children?: string | React.ReactElement;
   disabled?: boolean;
   is_loading?: boolean;
-  size?: string; //normal|mini
+  size?: string; // normal|mini
   rounded?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void; // Specify the type of the event parameter
 };
@@ -29,13 +28,14 @@ export default function PrimaryButton({
 }: PrimaryButtonProps) {
   return (
     <button
-      disabled={disabled}
-      onClick={onClick || undefined}
+      disabled={disabled || is_loading}
+      onClick={!disabled && !is_loading ? onClick : undefined}
       className={clsxm(
         'cursor-pointer flex w-full items-center justify-center gap-1 bg-Primary-500 text-center font-medium text-Base-white transition-all duration-300 disabled:bg-lighter-gray disabled:text-dark/60 whitespace-nowrap',
-        size && size == 'mini' ? 'py-2 px-4 text-sm' : 'py-3 px-4',
+        size && size === 'mini' ? 'py-2 px-4 text-sm' : 'py-3 px-4',
         rounded ? 'rounded-full' : 'rounded-xl',
-        btnClassName
+        btnClassName,
+        disabled || is_loading ? 'cursor-not-allowed' : ''
       )}
       {...rest}
     >
