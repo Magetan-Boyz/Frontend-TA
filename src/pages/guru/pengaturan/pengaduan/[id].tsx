@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
-import CardPengaduan from '@/components/sidebar/CardPengaduan';
+import CardPengaduan from '@/components/pengaduan/CardPengaduan';
 import KomentarPengaduan from '@/components/KomentarPengaduan';
 
 const initialDataPengaduan = [

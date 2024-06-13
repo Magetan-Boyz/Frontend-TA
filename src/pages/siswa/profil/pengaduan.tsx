@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLa
 import Seo from '@/components/Seo';
 import { useRouter } from 'next/router';
 import PrimaryButton from '@/components/PrimaryButton';
-import CardPengaduan from '@/components/sidebar/CardPengaduanSiswa';
+import CardPengaduan from '@/components/pengaduan/CardPengaduanSiswa';
 
 const initialDataPengaduan = [
   {
