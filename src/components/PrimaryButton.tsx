@@ -8,6 +8,7 @@ type PrimaryButtonProps = {
   is_loading?: boolean;
   size?: string; // normal|mini
   rounded?: boolean;
+  leftIcon?: React.ReactElement; // Optional left icon
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void; // Specify the type of the event parameter
 };
 
@@ -23,6 +24,7 @@ export default function PrimaryButton({
   size,
   is_loading,
   rounded,
+  leftIcon,
   onClick,
   ...rest
 }: PrimaryButtonProps) {
@@ -51,7 +53,8 @@ export default function PrimaryButton({
           </svg>
         </div>
       )}
-      <div className="">{children}</div>
+      {leftIcon && <div className="mr-2">{leftIcon}</div>}
+      <div className="flex items-center justify-center">{children}</div>
     </button>
   );
 }

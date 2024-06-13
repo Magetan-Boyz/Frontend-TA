@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { Button } from '@chakra-ui/react';
 import { FiUploadCloud } from 'react-icons/fi';

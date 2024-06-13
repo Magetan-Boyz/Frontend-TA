@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Navbar from '@/components/Navbar';
 
-import Sidebar from '@/components/sidebar/sidebarGuru/Sidebar';
+import Sidebar from '@/components/sidebar/sidebarSiswa/Sidebar';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   // Put Header or Footer Here
