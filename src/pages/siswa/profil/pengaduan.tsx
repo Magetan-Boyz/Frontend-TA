@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { useRouter } from 'next/router';
 import PrimaryButton from '@/components/PrimaryButton';
-import CardPengaduan from '@/components/sidebar/CardPengaduan';
+import CardPengaduan from '@/components/sidebar/CardPengaduanSiswa';
 
 const initialDataPengaduan = [
   {
@@ -60,7 +60,10 @@ export default function Pengaduan() {
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">List Pengaduan</h1>
             <div className="flex flex-col items-center gap-2 lg:flex-row">
-              <PrimaryButton btnClassName="font-semibold w-full lg:w-fit h-fit" onClick={() => router.push('/pengaturan/pengaduan/create')}>
+              <PrimaryButton
+                btnClassName="font-semibold w-full lg:w-fit h-fit"
+                onClick={() => router.push('/siswa/profil/pengaduan/create')}
+              >
                 Buat Baru
               </PrimaryButton>
             </div>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import PrimaryButton from '@/components/PrimaryButton';
 import { Select } from '@chakra-ui/react';

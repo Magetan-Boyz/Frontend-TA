@@ -121,7 +121,7 @@ export const SidebarData = [
     ]
   },
   {
-    title: 'Pengaturan Siswa',
+    title: 'Profil Siswa',
     path: '/support',
     icon: <LuUserSquare2 />,
     iconClosed: <RiArrowDownSLine />,
@@ -129,27 +129,27 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Data Diri Siswa',
-        path: '/siswa/pengaturan/datadiri',
+        path: '/siswa/profil/datadiri',
         icon: <GoDotFill />
       },
       {
         title: 'Konseling',
-        path: '/siswa/pengaturan/konseling',
+        path: '/siswa/profil/konseling',
         icon: <GoDotFill />
       },
       {
         title: 'Dispensasi',
-        path: '/siswa/pengaturan/dispensasi',
+        path: '/siswa/profil/dispensasi',
         icon: <GoDotFill />
       },
       {
         title: 'Logbook Pelanggaran',
-        path: '/siswa/pengaturan/logbookpelanggaran',
+        path: '/siswa/profil/logbookpelanggaran',
         icon: <GoDotFill />
       },
       {
         title: 'Pengaduan',
-        path: '/siswa/pengaturan/pengaduan',
+        path: '/siswa/profil/pengaduan',
         icon: <GoDotFill />
       }
     ]
