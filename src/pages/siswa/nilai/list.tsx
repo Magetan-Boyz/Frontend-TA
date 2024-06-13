@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 // import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { Select, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';

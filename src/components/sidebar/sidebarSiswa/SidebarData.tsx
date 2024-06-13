@@ -8,6 +8,7 @@ import { BiPieChartAlt2 } from 'react-icons/bi';
 import { LuBookOpen } from 'react-icons/lu';
 import { LuUserSquare2 } from 'react-icons/lu';
 import { GoDotFill } from 'react-icons/go';
+import { GrTrophy } from 'react-icons/gr';
 
 export const SidebarData = [
   {
@@ -96,6 +97,25 @@ export const SidebarData = [
       {
         title: 'Hasil Kuis',
         path: '/siswa/kuis/hasil',
+        icon: <GoDotFill />
+      }
+    ]
+  },
+  {
+    title: 'Prestasi',
+    path: '/prestasi',
+    icon: <GrTrophy />,
+    iconClosed: <RiArrowDownSLine />,
+    iconOpened: <RiArrowUpSLine />,
+    subNav: [
+      {
+        title: 'Beranda Prestasi',
+        path: '/siswa/prestasi/beranda',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Input Prestasi',
+        path: '/siswa/prestasi/input',
         icon: <GoDotFill />
       }
     ]
