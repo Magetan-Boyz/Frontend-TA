@@ -3,37 +3,34 @@ import AuthenticatedLayout from '@/components/layout/layoutAdmin/AuthenticatedLa
 // import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
-import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
-import PrimaryButton from '@/components/PrimaryButton';
 import { FiSearch } from 'react-icons/fi';
+import Image from 'next/image';
+import PrimaryButton from '@/components/PrimaryButton';
 
-export default function CreateMataPelajaran() {
+export default function ListKelas() {
   const router = useRouter();
   const [tugas] = React.useState([
     {
       id: 1,
-      namaMapel: 'Matematika',
-      semester: '1',
-      kelas: 'X',
-      partisipan: '10',
-      guru: 'John Doe'
+      namaguru: 'Monica',
+      namaKelas: 'Matematika',
+      email: 'monica@email.com',
+      jumlahsiswa: '123456'
     },
     {
       id: 3,
-      namaMapel: 'Matematika',
-      semester: '1',
-      kelas: 'X',
-      partisipan: '10',
-      guru: 'John Doe'
+      namaguru: 'Monica',
+      namaKelas: 'Matematika',
+      email: 'monica@email.com',
+      jumlahsiswa: '123456'
     },
     {
       id: 3,
-      namaMapel: 'Matematika',
-      semester: '1',
-      kelas: 'X',
-      partisipan: '10',
-      guru: 'John Doe'
+      namaguru: 'Monica',
+      namaKelas: 'Matematika',
+      email: 'monica@email.com',
+      jumlahsiswa: '123456'
     }
   ]);
 
@@ -46,38 +43,18 @@ export default function CreateMataPelajaran() {
   return (
     <div>
       <AuthenticatedLayout>
-        <Seo templateTitle="Home" />
+        <Seo templateTitle="List guru" />
         <div className="w-full p-3 border rounded-md shadow-lg h-fit border-Gray-200 bg-Base-white">
           <div className="flex items-center justify-between p-3 lg:border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">Detail Pengumpulan</h1>
+            <h1 className="text-lg font-semibold">List Kelas</h1>
             <PrimaryButton btnClassName="w-fit h-fit" onClick={() => router.push('/admin/mata-pelajaran/create')}>
-              Tambah Mata Pelajaran
+              Buat Kelas
             </PrimaryButton>
           </div>
           <div className="flex flex-col gap-4 py-6 lg:flex-row lg:justify-between lg:px-3">
             <span className="flex flex-col w-full gap-4">
               <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
-                Jenis Mata Pelajaran
-              </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </span>
-            <span className="flex flex-col w-full gap-4">
-              <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
                 Kelas
-              </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </span>
-            <span className="flex flex-col w-full gap-4">
-              <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
-                Semester
               </label>
               <Select placeholder="Kelas" size="md" name="sort" className="">
                 <option value="1">X</option>
@@ -105,28 +82,28 @@ export default function CreateMataPelajaran() {
             <Table className="">
               <Thead className="bg-Gray-50">
                 <Tr>
-                  <Th>ID</Th>
-                  <Th>Nama Mata Pelajaran</Th>
-                  <Th>Semester</Th>
-                  <Th>Kelas</Th>
-                  <Th>Partisipan</Th>
-                  <Th>Guru Pengajar</Th>
-                  <Th></Th>
+                  <Th>Nama Kelas</Th>
+                  <Th>Jumlah Siswa</Th>
+                  <Th>Wali Kelas</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {tugas.map((item, index) => (
                   <Tr key={index}>
-                    <Td>{item.id}</Td>
-                    <Td>{item.namaMapel}</Td>
-                    <Td>{item.semester}</Td>
-                    <Td>{item.kelas}</Td>
-                    <Td>{item.partisipan}</Td>
-                    <Td>{item.guru}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={() => router.push(`/materi/literasi/${item.id}`)}>
-                        Details
-                      </SecondaryButton>
+                    <Td>{item.namaKelas}</Td>
+                    <Td>{item.jumlahsiswa}</Td>
+                    <Td className="flex items-center gap-2">
+                      <Image
+                        src={`https://ui-avatars.com/api/?name=${item.namaguru}`}
+                        alt="Logo"
+                        width={40}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <div className="">
+                        <span className="text-sm font-medium text-Gray-900">{item.namaguru}</span>
+                        <span className="text-sm font-medium text-Gray-500">{item.email}</span>
+                      </div>
                     </Td>
                   </Tr>
                 ))}

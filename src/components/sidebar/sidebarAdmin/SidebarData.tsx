@@ -29,7 +29,7 @@ export const SidebarData = [
       },
       {
         title: 'List Guru Pengajar',
-        path: '/admin/mata-pelajaran/list',
+        path: '/admin/mata-pelajaran/listguru',
         icon: <GoDotFill />
       }
     ]
@@ -43,7 +43,7 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Akun Guru',
-        path: '/admin/guru/akunGuru',
+        path: '/admin/guru/akun',
         icon: <GoDotFill />
       }
     ]
