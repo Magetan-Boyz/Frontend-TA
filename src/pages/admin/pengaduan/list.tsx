@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutAdmin/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { useRouter } from 'next/router';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -11,9 +11,7 @@ const initialDataPengaduan = [
     id: 1,
     nama: 'Dominica',
     waktu: '10 jam yang lalu',
-    isiPengaduan: 'Sampai kapan nih pengajuan untuk dispensasi lomba belum di acc? mohon dibantu ya bapak ibu guru untuk di acc',
-    initialLikes: 24,
-    initialComments: 10
+    isiPengaduan: 'Sampai kapan nih pengajuan untuk dispensasi lomba belum di acc? mohon dibantu ya bapak ibu guru untuk di acc'
   }
   // Tambahkan data pengaduan lainnya di sini
 ];
@@ -32,13 +30,13 @@ export default function Pengaduan() {
         <Seo templateTitle="Pengaduan" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">List Jawaban Pengaduan</h1>
+            <h1 className="text-lg font-semibold">List Balasan Pengaduan</h1>
             <div className="flex flex-col items-center gap-2 lg:flex-row">
               <PrimaryButton
                 btnClassName="font-semibold w-full lg:w-fit h-fit"
                 onClick={() => router.push('/siswa/profil/pengaduan/create')}
               >
-                Posting Pengaduan Baru
+                Posting Balasan Pengaduan
               </PrimaryButton>
             </div>
           </div>

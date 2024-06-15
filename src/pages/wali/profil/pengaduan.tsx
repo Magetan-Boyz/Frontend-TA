@@ -18,35 +18,9 @@ const initialDataPengaduan = [
   // Tambahkan data pengaduan lainnya di sini
 ];
 
-const initialDataKomentar = [
-  {
-    id: 1,
-    pengaduanId: 1,
-    nama: 'Dominica',
-    waktu: '10 jam yang lalu',
-    isiKomentar: 'Betul tuh sekarang jadi lama'
-  },
-  {
-    id: 2,
-    pengaduanId: 1,
-    nama: 'Dominica',
-    waktu: '10 jam yang lalu',
-    isiKomentar: 'Ayo guys speak up guys'
-  },
-  {
-    id: 3,
-    pengaduanId: 1,
-    nama: 'Dominica',
-    waktu: '10 jam yang lalu',
-    isiKomentar: 'Ayo guys speak up guys'
-  }
-  // Tambahkan data komentar lainnya di sini
-];
-
 export default function Pengaduan() {
   const router = useRouter();
   const [dataPengaduan, setDataPengaduan] = useState(initialDataPengaduan);
-  const [dataKomentar] = useState(initialDataKomentar);
 
   const handleDeletePengaduan = (id: number) => {
     setDataPengaduan(dataPengaduan.filter((pengaduan) => pengaduan.id !== id));
@@ -58,28 +32,24 @@ export default function Pengaduan() {
         <Seo templateTitle="Pengaduan" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">List Pengaduan</h1>
+            <h1 className="text-lg font-semibold">List Jawaban Pengaduan</h1>
             <div className="flex flex-col items-center gap-2 lg:flex-row">
               <PrimaryButton
                 btnClassName="font-semibold w-full lg:w-fit h-fit"
                 onClick={() => router.push('/siswa/profil/pengaduan/create')}
               >
-                Buat Baru
+                Posting Pengaduan Baru
               </PrimaryButton>
             </div>
           </div>
           <div className="p-3 space-y-4">
             {dataPengaduan.map((pengaduan) => {
-              const komentarForPengaduan = dataKomentar.filter((komentar) => komentar.pengaduanId === pengaduan.id);
               return (
                 <CardPengaduan
                   key={pengaduan.id}
                   nama={pengaduan.nama}
                   waktu={pengaduan.waktu}
                   isiPengaduan={pengaduan.isiPengaduan}
-                  initialLikes={pengaduan.initialLikes}
-                  comments={komentarForPengaduan}
-                  id={pengaduan.id}
                   onDelete={() => handleDeletePengaduan(pengaduan.id)}
                 />
               );
