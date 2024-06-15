@@ -108,12 +108,10 @@ export default function DetailPrestasi() {
               )}
             </div>
             <div className="flex items-center justify-end gap-3">
-              <Button leftIcon={<CgCloseO />} variant="outline">
+              <Button leftIcon={<CgCloseO />} onClick={onOpen} variant="outline">
                 Decline
               </Button>
-              <PrimaryButton btnClassName="w-fit h-fit rounded-md" onClick={onOpen}>
-                Approve
-              </PrimaryButton>
+              <PrimaryButton btnClassName="w-fit h-fit rounded-md">Approve</PrimaryButton>
             </div>
           </div>
         </div>
