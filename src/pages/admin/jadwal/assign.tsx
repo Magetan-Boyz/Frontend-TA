@@ -2,14 +2,33 @@ import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutAdmin/AuthenticatedLayout';
 // import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
+import {
+  Select,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure
+} from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
 import { FiSearch } from 'react-icons/fi';
 import Image from 'next/image';
 import PrimaryButton from '@/components/PrimaryButton';
+import { LuBookOpen } from 'react-icons/lu';
+import { MdClose } from 'react-icons/md';
 
 export default function AssignJadwal() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
   const [tugas] = React.useState([
     {
@@ -29,6 +48,21 @@ export default function AssignJadwal() {
       namaguru: 'Monica',
       namaMapel: 'Matematika',
       kelas: 'XII'
+    }
+  ]);
+
+  const [kelas] = React.useState([
+    {
+      id: 1,
+      namaKelas: 'X'
+    },
+    {
+      id: 2,
+      namaKelas: 'XI'
+    },
+    {
+      id: 3,
+      namaKelas: 'XII'
     }
   ]);
 
@@ -116,7 +150,7 @@ export default function AssignJadwal() {
                     </Td>
                     <Td>{item.kelas}</Td>
                     <Td>
-                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={() => router.push(`/materi/literasi/${item.id}`)}>
+                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={onOpen}>
                         Assign Kelas
                       </SecondaryButton>
                     </Td>
@@ -126,6 +160,53 @@ export default function AssignJadwal() {
             </Table>
           </div>
         </div>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>
+              <div className="p-2 rounded-full w-[36px] bg-Warning-100">
+                <LuBookOpen className="rotate-0 text-Warning-600" />
+              </div>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <h1 className="text-lg font-semibold">Assign Guru Pengajar</h1>
+              <p className="text-sm font-light text-Gray-600">Pilih dari search atau list dari daftar guru pengajar</p>
+              <form action="" className="pb-3 mt-3">
+                <div className="flex flex-col gap-3">
+                  <label htmlFor="judul" className="text-sm text-Gray-600">
+                    Judul
+                  </label>
+                  <Select placeholder="Kelas" size="md" name="sort" className="">
+                    <option value="1">X</option>
+                    <option value="2">XI</option>
+                    <option value="3">XII</option>
+                  </Select>
+                </div>
+              </form>
+              <div className="flex flex-col py-3 overflow-y-auto h-[200px]">
+                {kelas.map((item, index) => (
+                  <div className="flex items-center w-full gap-3 px-8 py-4 border-b justidy-between border-Gray-200" key={index}>
+                    <div className="flex items-center w-full gap-3">
+                      <div className="">
+                        <span className="text-sm font-medium text-Gray-900">{item.namaKelas}</span>
+                      </div>
+                    </div>
+                    <MdClose className="cursor-pointer text-Gray-500" />
+                  </div>
+                ))}
+              </div>
+            </ModalBody>
+            <ModalFooter className="flex justify-center gap-3">
+              <SecondaryButton onClick={onClose} btnClassName="font-semibold">
+                Batal
+              </SecondaryButton>
+              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
+                Konfirmasi
+              </PrimaryButton>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </AuthenticatedLayout>
     </div>
   );
