@@ -2,7 +2,22 @@ import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLa
 import * as React from 'react';
 import Seo from '@/components/Seo';
 import SecondaryButton from '@/components/SecondaryButton';
-import { Box, useRadio, useRadioGroup, UseRadioProps } from '@chakra-ui/react';
+import {
+  Box,
+  useRadio,
+  useRadioGroup,
+  UseRadioProps,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
+} from '@chakra-ui/react';
+import { LuBookOpen } from 'react-icons/lu';
+import PrimaryButton from '@/components/PrimaryButton';
 
 interface Question {
   text: string;
@@ -58,6 +73,7 @@ function RadioCard(props: RadioCardProps) {
 }
 
 export default function PengerjaanKuis() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const initialQuestions: Question[] = [
     {
       text: 'What is the capital of France?',
@@ -245,9 +261,36 @@ export default function PengerjaanKuis() {
                 </button>
               ))}
             </div>
-            <SecondaryButton btnClassName="w-fit h-fit text-sm">Finish Attempt</SecondaryButton>
+            <SecondaryButton btnClassName="w-fit h-fit text-sm" onClick={onOpen}>
+              Finish Attempt
+            </SecondaryButton>
           </div>
         </div>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+          <ModalOverlay backdropBlur="10px" />
+          <ModalContent>
+            <ModalHeader className="mt-3">
+              <div className="p-2 w-[36px] rounded-full bg-Warning-100">
+                <LuBookOpen className="text-Warning-600" />
+              </div>
+            </ModalHeader>
+            <ModalCloseButton className="mt-4" />
+            <ModalBody>
+              <h1 className="text-lg font-semibold">Selesaikan Kuis</h1>
+              <p className="text-sm">Apakah kamu ingin menyelesaikan kuis?</p>
+              <p className="text-sm">Pastikan kamu sudah yakin dengan jawaban kamu</p>
+            </ModalBody>
+
+            <ModalFooter className="flex justify-center gap-3">
+              <SecondaryButton onClick={onClose} btnClassName="font-semibold">
+                Batal
+              </SecondaryButton>
+              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
+                Konfirmasi
+              </PrimaryButton>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </AuthenticatedLayout>
     </div>
   );
