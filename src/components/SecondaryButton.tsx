@@ -32,7 +32,7 @@ export default function SecondaryButton({
       disabled={disabled}
       onClick={onClick || undefined}
       className={clsxm(
-        'cursor-pointer flex w-full items-center justify-center gap-1 bg-Base-white text-center font-medium text-Gray-700 transition-all duration-300 border-2 border-Gray-300 disabled:bg-lighter-gray disabled:text-dark/60',
+        'cursor-pointer flex w-full items-center justify-center gap-1 whitespace-nowrap bg-Base-white text-center font-medium text-Gray-700 transition-all duration-300 border-2 border-Gray-300 disabled:bg-lighter-gray disabled:text-dark/60',
         size && size == 'mini' ? 'py-2 px-4 text-sm' : 'py-3 px-4',
         rounded ? 'rounded-full' : 'rounded-xl',
         btnClassName
