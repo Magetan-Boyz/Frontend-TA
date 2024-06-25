@@ -9,6 +9,7 @@ type SecondaryButtonProps = {
   is_loading?: boolean;
   size?: string; //normal|mini
   rounded?: boolean;
+  leftIcon?: React.ReactElement; // Optional left icon
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void; // Specify the type of the event parameter
 };
 
@@ -25,6 +26,7 @@ export default function SecondaryButton({
   is_loading,
   rounded,
   onClick,
+  leftIcon,
   ...rest
 }: SecondaryButtonProps) {
   return (
@@ -51,6 +53,7 @@ export default function SecondaryButton({
           </svg>
         </div>
       )}
+      {leftIcon && <div className="mr-2">{leftIcon}</div>}
       <div className="">{children}</div>
     </button>
   );
