@@ -1,43 +1,52 @@
 import * as React from 'react';
-import { Avatar, AvatarGroup, Button, Select, Box, Text } from '@chakra-ui/react';
+import { Avatar, AvatarGroup, Button, Select, Text, Tag } from '@chakra-ui/react';
 import { MdAdd } from 'react-icons/md';
-import dynamic from 'next/dynamic';
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { AiOutlineDrag } from 'react-icons/ai';
+import { BsEye, BsEyeSlash, BsLink } from 'react-icons/bs';
+import { MdKeyboardArrowDown, MdOutlineAddBox } from 'react-icons/md';
 
-// Dynamically import react-beautiful-dnd components
-const DragDropContext = dynamic(() => import('react-beautiful-dnd').then((mod) => mod.DragDropContext), { ssr: false });
-const Droppable = dynamic(() => import('react-beautiful-dnd').then((mod) => mod.Droppable), { ssr: false });
-const Draggable = dynamic(() => import('react-beautiful-dnd').then((mod) => mod.Draggable), { ssr: false });
+// Define types for the items and state
+type Item = {
+  id: string;
+  content: string;
+  sub?: string[];
+  visible: string;
+};
 
-const initialItems = [
+const initialItems: Item[] = [
   {
-    id: '1',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     content: 'IPA Fotosintesis Dasar',
-    visible: false
+    sub: ['IPA Fotosintesis Dasar', 'IPA Fotosintesis Menengah', 'IPA Fotosintesis Tingkat Lanjut'],
+    visible: 'hidden'
   },
   {
-    id: '2',
+    id: '4e0c103b-e191-4fca-97b8-13541e4a49fd',
     content: 'Menanam Jagung',
-    visible: true
+    sub: ['Menanam Jagung', 'Menanam Jagung', 'Menanam Jagung'],
+    visible: 'all'
   },
   {
-    id: '3',
+    id: '62a5cfb7-ff85-42b7-a244-9b3312a71718',
     content: 'Menanam Jagung',
-    visible: true
+    sub: ['Menanam Jagung', 'Menanam Jagung', 'Menanam Jagung'],
+    visible: 'invited'
   }
 ];
 
 export default function Susun() {
-  const [items, setItems] = React.useState(initialItems);
+  const [items, setItems] = React.useState<Item[]>(initialItems);
   const [winReady, setWinReady] = React.useState(false);
-  const [expanded, setExpanded] = React.useState(null);
+  const [expanded, setExpanded] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setWinReady(true);
   }, []);
 
-  const handleOnDragEnd = (result) => {
+  const handleOnDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const reorderedItems = Array.from(items);
     const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
@@ -45,7 +54,7 @@ export default function Susun() {
     setItems(reorderedItems);
   };
 
-  const toggleExpand = (id) => {
+  const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
   };
 
@@ -79,15 +88,12 @@ export default function Susun() {
         </div>
       </div>
 
-      <div className="p-5 mt-5 rounded-md bg-Base-white">
-        <div className="flex justify-between mb-4">
+      <div className="pb-5 mt-5 rounded-md bg-Base-white">
+        <div className="flex justify-between p-5 mb-4">
           <Text fontSize="lg" fontWeight="bold">
             Susunan Materi
           </Text>
           <div>
-            <Button leftIcon={<MdAdd />} colorScheme="blue" variant="solid" mr={2}>
-              Tambah Sesi
-            </Button>
             <Button colorScheme="gray" variant="outline">
               Preview
             </Button>
@@ -102,21 +108,58 @@ export default function Susun() {
                   {items.map(({ id, content, visible }, index) => (
                     <Draggable key={id} draggableId={id} index={index}>
                       {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4 border rounded-md"
-                        >
-                          <div className="flex justify-between p-3 bg-gray-100 cursor-pointer" onClick={() => toggleExpand(id)}>
-                            <Box flex="1" textAlign="left">
-                              {visible ? <span>👁️</span> : <span>🚫</span>} {content}
-                            </Box>
+                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-4">
+                          <div
+                            className="flex items-center justify-between p-3 cursor-pointer bg-Gray-100"
+                            onClick={() => toggleExpand(id)}
+                          >
+                            <div className="flex items-center gap-5">
+                              <AiOutlineDrag className="text-xl" />
+                              <div className="p-3 rounded-md bg-Base-white">
+                                {visible === 'hidden' ? (
+                                  <BsEyeSlash className="text-xl" />
+                                ) : visible === 'all' ? (
+                                  <BsEye className="text-xl" />
+                                ) : (
+                                  <BsLink className="text-xl" />
+                                )}
+                              </div>
+                              <Tag colorScheme="blue" borderRadius="full" border={1} size="sm">
+                                {id.slice(0, 4)}
+                              </Tag>
+                              <h1 className="font-bold text-md">{content}</h1>
+                            </div>
+                            <div className="flex items-center gap-5">
+                              {visible === 'invited' ? (
+                                <>
+                                  <AvatarGroup size="sm" max={5} className="hidden md:block">
+                                    <Avatar name="Ryan Florence" src="https://bit.ly/ryan-florence" />
+                                    <Avatar name="Segun Adebayo" src="https://bit.ly/sage-adebayo" />
+                                    <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
+                                    <Avatar name="Prosper Otemuyiwa" src="https://bit.ly/prosper-baba" />
+                                    <Avatar name="Christian Nwamba" src="https://bit.ly/code-beast" />
+                                  </AvatarGroup>
+                                  <Button leftIcon={<MdAdd />} colorScheme="gray" bg="white" size="sm" variant="outline">
+                                    Tambah Siswa
+                                  </Button>
+                                </>
+                              ) : (
+                                ''
+                              )}
+                              <MdKeyboardArrowDown className={`text-xl ${expanded === id ? 'transform rotate-180' : ''}`} />
+                            </div>
                           </div>
                           {expanded === id && (
-                            <div className="p-3">
-                              <Text>Content for {content}</Text>
-                            </div>
+                            <>
+                              {items[index].sub?.map((item, index) => (
+                                <div key={index} className="p-5 border-b border-Gray-200">
+                                  <h1 className="font-bold text-md">Content for {item}</h1>
+                                </div>
+                              ))}
+                              <button className="flex items-center gap-5 p-5 border-b border-Gray-200">
+                                <MdOutlineAddBox className="text-xl" /> <h1 className="font-bold text-md">Tambah Sesi</h1>
+                              </button>
+                            </>
                           )}
                         </div>
                       )}
@@ -128,6 +171,11 @@ export default function Susun() {
             </Droppable>
           </DragDropContext>
         )}
+        <div className="flex justify-end p-5">
+          <Button leftIcon={<MdAdd />} colorScheme="gray" variant="outline" mr={2}>
+            Tambah Materi
+          </Button>
+        </div>
       </div>
     </AuthenticatedLayout>
   );
