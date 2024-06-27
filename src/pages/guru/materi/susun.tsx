@@ -1,5 +1,23 @@
 import * as React from 'react';
-import { Avatar, AvatarGroup, Button, Select, Text, Tag } from '@chakra-ui/react';
+import {
+  Avatar,
+  AvatarGroup,
+  Button,
+  Select,
+  Text,
+  Tag,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
+} from '@chakra-ui/react';
+import { PiFlagBannerBold } from 'react-icons/pi';
+import PrimaryButton from '@/components/PrimaryButton';
+import SecondaryButton from '@/components/SecondaryButton';
 import { MdAdd } from 'react-icons/md';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
@@ -41,6 +59,8 @@ export default function Susun() {
   const [items, setItems] = React.useState<Item[]>(initialItems);
   const [winReady, setWinReady] = React.useState(false);
   const [expanded, setExpanded] = React.useState<string | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [newItemContent, setNewItemContent] = React.useState<string>('');
 
   React.useEffect(() => {
     setWinReady(true);
@@ -56,6 +76,16 @@ export default function Susun() {
 
   const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
+  };
+
+  const addItem = () => {
+    const newItem: Item = {
+      id: (Math.random() * 100000).toString(), // Generate a random ID for simplicity
+      content: newItemContent,
+      visible: 'hidden' // Default visibility
+    };
+    setItems([...items, newItem]);
+    onClose();
   };
 
   return (
@@ -156,7 +186,7 @@ export default function Susun() {
                                   <h1 className="font-bold text-md">Content for {item}</h1>
                                 </div>
                               ))}
-                              <button className="flex items-center gap-5 p-5 border-b border-Gray-200">
+                              <button className="flex items-center w-full gap-5 p-5 border-b border-Gray-200">
                                 <MdOutlineAddBox className="text-xl" /> <h1 className="font-bold text-md">Tambah Sesi</h1>
                               </button>
                             </>
@@ -172,11 +202,44 @@ export default function Susun() {
           </DragDropContext>
         )}
         <div className="flex justify-end p-5">
-          <Button leftIcon={<MdAdd />} colorScheme="gray" variant="outline" mr={2}>
+          <Button leftIcon={<MdAdd />} colorScheme="gray" onClick={onOpen} variant="outline" mr={2}>
             Tambah Materi
           </Button>
         </div>
       </div>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <div className="p-2 rounded-md w-[36px] shadow-md border border-Gray-200 bg-Base-white">
+              <PiFlagBannerBold className="rotate-0" />
+            </div>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <h1 className="text-lg font-semibold">Tambah Materi</h1>
+            <p className="text-sm font-light text-Gray-600">Pilih Materi yang akan ditampilkan</p>
+            <form action="" className="mt-3">
+              <label htmlFor="judul" className="text-sm text-Gray-600">
+                Referensi Materi
+              </label>
+              <Select placeholder="Pilih Materi" size="md" name="sort" className="mt-3" onChange={(e) => setNewItemContent(e.target.value)}>
+                <option value="IPA Fotosintesis Dasar">IPA Fotosintesis Dasar</option>
+                <option value="IPA Fotosintesis Menengah">IPA Fotosintesis Menengah</option>
+                <option value="IPA Fotosintesis Tingkat Lanjut">IPA Fotosintesis Tingkat Lanjut</option>
+              </Select>
+            </form>
+          </ModalBody>
+          <ModalFooter className="flex justify-center gap-3">
+            <SecondaryButton onClick={onClose} btnClassName="font-semibold">
+              Batal
+            </SecondaryButton>
+            <PrimaryButton onClick={addItem} btnClassName="font-semibold">
+              Tambahkan
+            </PrimaryButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </AuthenticatedLayout>
   );
 }
