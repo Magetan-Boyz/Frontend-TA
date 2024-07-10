@@ -1,47 +1,54 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-
-import { Select, Avatar } from '@chakra-ui/react';
-import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel } from '@chakra-ui/react';
+import { Select, Avatar, Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Spinner } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
 import { Button } from '@chakra-ui/react';
 import { FiSearch } from 'react-icons/fi';
+import axios from 'axios';
 
 export default function PrestasiList() {
   const router = useRouter();
-  const [prestasi] = React.useState([
-    {
-      id: 1,
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Peserta',
-      tingkat: 'Kabupaten',
-      status: 'Success'
-    },
-    {
-      id: 2,
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Juara 1',
-      tingkat: 'Nasional',
-      status: 'success'
-    },
-    {
-      id: 3,
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Juara 2',
-      tingkat: 'Kota',
-      status: 'success'
-    }
-    // Add more items as needed
-  ]);
+  const [prestasi, setPrestasi] = React.useState([]);
+  const [profile, setProfile] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/profile`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setProfile(response.data.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    const fetchPrestasi = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/achivement`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setPrestasi(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching achievements:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+    fetchPrestasi();
+  }, []);
 
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 10;
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -50,17 +57,30 @@ export default function PrestasiList() {
   };
 
   const handleNextPage = () => {
-    if (currentPage < Math.ceil(prestasi.length / itemsPerPage)) {
+    if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const currentData = prestasi.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   const [searchTerm, setSearchTerm] = React.useState('');
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
+
+  const filteredData = (prestasi || []).filter((item) => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout>
+        <Seo templateTitle="Detail Nilai" />
+        <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white flex justify-center items-center">
+          <Spinner size="xl" />
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <div>
@@ -78,17 +98,13 @@ export default function PrestasiList() {
             </div>
           </div>
           <div className="flex items-center gap-5 p-7">
-            <Avatar size="2xl" name="Segun Adebayo" src="https://bit.ly/sage-adebayo" showBorder={true} className="shadow-lg" />
+            <Avatar size="2xl" name={profile.name} src="https://bit.ly/sage-adebayo" showBorder={true} className="shadow-lg" />
             <div>
-              <h1 className="text-3xl font-semibold">John Doe</h1>
-              <h1 className=" text-Gray-600 text-medium">NISN : 1234567890</h1>
-              <h1 className="text-Gray-600 text-medium">Jenis Kelamin : Perempuan</h1>
-              <h1 className="text-Gray-600 text-medium">Kelas : X</h1>
+              <h1 className="text-3xl font-semibold">{profile.name}</h1>
+              <h1 className=" text-Gray-600 text-medium">NISN : {profile.nisn}</h1>
+              <h1 className="text-Gray-600 text-medium">Jenis Kelamin : {profile.gender}</h1>
             </div>
           </div>
-          <h1 className="p-3 font-semibold text-Gray-500">
-            Total Point Prestasi : <span className="text-Gray-900">180</span>
-          </h1>
         </div>
         <div className="w-full p-3 rounded-md shadow bg-Base-white h-fit">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:items-center">
@@ -122,17 +138,17 @@ export default function PrestasiList() {
               <Tbody>
                 {currentData.map((item, index) => (
                   <Tr key={index}>
-                    <Td>{index + 1}</Td>
-                    <Td>{item.jenisPrestasi}</Td>
-                    <Td>{item.nama}</Td>
-                    <Td>{item.partisipasi}</Td>
-                    <Td>{item.tingkat}</Td>
+                    <Td>{(currentPage - 1) * itemsPerPage + index + 1}</Td>
+                    <Td>{item.type_of_achivement}</Td>
+                    <Td>{item.title}</Td>
+                    <Td>{item.participation}</Td>
+                    <Td>{item.level}</Td>
                     <Td>
-                      {item.status === 'Wait Approval' ? (
+                      {item.status === 'pending' ? (
                         <Tag colorScheme="blue" borderRadius="full" size="sm">
                           <TagLabel>Wait Approval</TagLabel>
                         </Tag>
-                      ) : item.status === 'Success' ? (
+                      ) : item.status === 'accepted' ? (
                         <Tag colorScheme="green" borderRadius="full" size="sm">
                           <TagLabel>Success</TagLabel>
                         </Tag>
@@ -166,12 +182,12 @@ export default function PrestasiList() {
               Previous
             </SecondaryButton>
             <span className="self-center">
-              Page {currentPage} of {Math.ceil(prestasi.length / itemsPerPage)}
+              Page {currentPage} of {Math.ceil(filteredData.length / itemsPerPage)}
             </span>
             <SecondaryButton
-              btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(prestasi.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
+              btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(filteredData.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
               onClick={handleNextPage}
-              disabled={currentPage === Math.ceil(prestasi.length / itemsPerPage)}
+              disabled={currentPage === Math.ceil(filteredData.length / itemsPerPage)}
             >
               Next
             </SecondaryButton>

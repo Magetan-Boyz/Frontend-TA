@@ -1,68 +1,110 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel } from '@chakra-ui/react';
+import {
+  Select,
+  Table,
+  Thead,
+  Tr,
+  Tbody,
+  Th,
+  Td,
+  Tag,
+  TagLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Input,
+  Button,
+  Spinner
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 import Image from 'next/image';
 import SecondaryButton from '@/components/SecondaryButton';
-import { FaFilePdf } from 'react-icons/fa';
 import PrimaryButton from '@/components/PrimaryButton';
+import { FaFilePdf } from 'react-icons/fa';
+import { PiFlagBannerBold } from 'react-icons/pi';
+import { FiInfo } from 'react-icons/fi';
 
 export default function Pelanggaran() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
-  const [user, setUser] = React.useState([
-    {
-      id: 1,
-      nama: 'Dominica',
-      nis: '111909891',
-      sk: '123/123.JKL',
-      mulaiHukuman: '18/05/2022',
-      selesaiHukuman: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Wait Approval'
-    },
-    {
-      id: 2,
-      nama: 'Dominica',
-      nis: '111909891',
-      sk: '123/123.JKL',
-      mulaiHukuman: '18/05/2022',
-      selesaiHukuman: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Success'
-    },
-    {
-      id: 3,
-      nama: 'Dominica',
-      nis: '111909891',
-      sk: '123/123.JKL',
-      mulaiHukuman: '18/05/2022',
-      selesaiHukuman: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Wait Approval'
-    },
-    {
-      id: 4,
-      nama: 'Dominica',
-      nis: '111909891',
-      sk: '123/123.JKL',
-      mulaiHukuman: '18/05/2022',
-      selesaiHukuman: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Declined'
-    }
-  ]);
+  const [violations, setViolations] = React.useState([]);
+  const [classes, setClasses] = React.useState([]);
+  const [students, setStudents] = React.useState([]);
+  const [selectedClass, setSelectedClass] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    student_id: '',
+    sk: '',
+    start_punishment: '',
+    end_punishment: '',
+    documents: '',
+    reason: ''
+  });
 
-  const handleApprove = (id: number) => {
-    setUser((prevUsers) => prevUsers.map((user) => (user.id === id ? { ...user, status: 'Success' } : user)));
+  React.useEffect(() => {
+    const fetchClassesAndViolations = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const [classesResponse, violationsResponse] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/violation/all`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        setClasses(classesResponse.data.data || []);
+        setViolations(violationsResponse.data.data || []);
+      } catch (error) {
+        console.error('Error fetching classes and violations:', error);
+      }
+    };
+
+    fetchClassesAndViolations();
+  }, []);
+
+  const handleClassChange = async (e) => {
+    const selectedClass = e.target.value;
+    setSelectedClass(selectedClass);
+    setLoading(true);
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/students/${selectedClass}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStudents(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDecline = (id: number) => {
-    setUser((prevUsers) => prevUsers.map((user) => (user.id === id ? { ...user, status: 'Declined' } : user)));
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/teacher/violation/create`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error creating violation:', error);
+    }
   };
 
   return (
@@ -73,12 +115,16 @@ export default function Pelanggaran() {
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">Daftar Pelanggaran Siswa</h1>
             <div className="flex flex-col items-center gap-2 lg:flex-row">
-              <Select placeholder="Kelas" size="md">
-                <option value="1">VII - A</option>
-                <option value="2">VIII - B</option>
-                <option value="3">IX - C</option>
+              <Select placeholder="Kelas" size="md" onChange={handleClassChange}>
+                {classes.map((cls) => (
+                  <option key={cls.id} value={cls.class_id}>
+                    {cls.class_name}
+                  </option>
+                ))}
               </Select>
-              <PrimaryButton btnClassName="font-semibold w-full lg:w-fit h-fit">Buat Baru</PrimaryButton>
+              <PrimaryButton onClick={onOpen} btnClassName="font-semibold w-full lg:w-fit h-fit">
+                Buat Baru
+              </PrimaryButton>
             </div>
           </div>
           <div className="m-3 border rounded-lg shadow-sm ">
@@ -91,77 +137,118 @@ export default function Pelanggaran() {
                   <Th>Mulai Hukuman</Th>
                   <Th>Selesai Hukuman</Th>
                   <Th>Surat Keputusan</Th>
-                  <Th>Status</Th>
-                  <Th></Th>
+                  <Th>Alasan</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {user.map((item, index) => (
+                {violations.map((violation, index) => (
                   <Tr key={index}>
-                    <Td className="flex items-center gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.nama}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="">
-                        <span className="text-sm font-medium text-Gray-900">{item.nama}</span>
+                    <Td className="">
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={`https://ui-avatars.com/api/?name=${violation.student}`}
+                          alt="Logo"
+                          width={40}
+                          height={24}
+                          className="rounded-full"
+                        />
+                        <div className="">
+                          <span className="text-sm font-medium text-Gray-900">{violation.student}</span>
+                        </div>
                       </div>
                     </Td>
-                    <Td className="text-sm text-Gray-900">{item.nis}</Td>
+                    <Td className="text-sm text-Gray-900">{violation.student_id}</Td>
                     <Td className="text-sm text-Primary-500">
-                      <a href={`/path/to/${item.sk}`} className="hover:underline">
-                        {item.sk}
+                      <a href={violation.documents} className="hover:underline">
+                        {violation.sk}
                       </a>
                     </Td>
-                    <Td className="text-sm text-Gray-900">{item.mulaiHukuman}</Td>
-                    <Td className="text-sm text-Gray-900">{item.selesaiHukuman}</Td>
-                    <Td className="flex items-center gap-2 text-sm text-Gray-900">
-                      <FaFilePdf className="text-2xl text-Error-500" />
-                      <div className="text-xs text-Gray-500">
-                        <h1>{item.dokumen}</h1>
-                        <h1>{item.ukuranDokumen}</h1>
+                    <Td className="text-sm text-Gray-900">{violation.start_punishment}</Td>
+                    <Td className="text-sm text-Gray-900">{violation.end_punishment}</Td>
+                    <Td className="text-sm text-Gray-900">
+                      <div className="flex items-center gap-2">
+                        <FaFilePdf className="text-2xl text-Error-500" />
+                        <div className="text-xs text-Gray-500">
+                          <h1>{violation.documents}</h1>
+                        </div>
                       </div>
                     </Td>
-                    <Td>
-                      {item.status === 'Wait Approval' ? (
-                        <Tag colorScheme="blue" borderRadius="full" size="sm">
-                          <TagLabel>Wait Approval</TagLabel>
-                        </Tag>
-                      ) : item.status === 'Success' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Success</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Declined</TagLabel>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      {item.status === 'Wait Approval' ? (
-                        <div className="flex flex-col items-center gap-4 lg:flex-row lg:gap-0">
-                          <button className="mr-2 font-semibold text-Error-500" onClick={() => handleDecline(item.id)}>
-                            Decline
-                          </button>
-                          <button className="font-semibold text-Success-500" onClick={() => handleApprove(item.id)}>
-                            Approve
-                          </button>
-                        </div>
-                      ) : (
-                        <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/pelanggaran/detail/${item.id}`)}>
-                          Details
-                        </SecondaryButton>
-                      )}
-                    </Td>
+                    <Td className="text-sm text-Gray-900">{violation.reason}</Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
           </div>
         </div>
+        <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>
+              <div className="p-2 rounded-md w-[36px] shadow-md border border-Gray-200 bg-Base-white">
+                <PiFlagBannerBold className="rotate-0" />
+              </div>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <h1 className="text-lg font-semibold">Tambah Pelanggaran Siswa</h1>
+              <p className="text-sm font-light text-Gray-600">Isi kolom berikut untuk menambah atau mengedit pelanggaran siswa</p>
+              <form action="" className="mt-3">
+                <div className="flex flex-col mt-2 mb-2">
+                  <label htmlFor="student_id" className="text-sm text-Gray-600">
+                    Assign Nama Siswa
+                  </label>
+                  <Select placeholder="Pilih Siswa" size="md" name="student_id" className="w-full" onChange={handleInputChange}>
+                    {students.map((student) => (
+                      <option key={student.id} value={student.id}>
+                        {student.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="flex flex-col mt-2 mb-2">
+                  <label htmlFor="sk" className="text-sm text-Gray-600">
+                    SK
+                  </label>
+                  <Input type="text" name="sk" id="sk" onChange={handleInputChange} />
+                </div>
+                <div className="flex justify-between gap-3">
+                  <div className="flex flex-col w-full mt-2 mb-2">
+                    <label htmlFor="start_punishment" className="text-sm text-Gray-600">
+                      Tanggal Mulai Hukuman
+                    </label>
+                    <Input type="date" name="start_punishment" id="start_punishment" onChange={handleInputChange} />
+                  </div>
+                  <div className="flex flex-col w-full mt-2 mb-2">
+                    <label htmlFor="end_punishment" className="text-sm text-Gray-600">
+                      Tanggal Selesai Hukuman
+                    </label>
+                    <Input type="date" name="end_punishment" id="end_punishment" onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div className="flex flex-col mt-2 mb-2">
+                  <label htmlFor="documents" className="text-sm text-Gray-600">
+                    Dokumen Pendukung
+                  </label>
+                  <Input type="text" name="documents" id="documents" onChange={handleInputChange} />
+                </div>
+                <div className="flex flex-col mt-2 mb-2">
+                  <label htmlFor="reason" className="text-sm text-Gray-600">
+                    Alasan Pelanggaran
+                  </label>
+                  <Input type="text" name="reason" id="reason" onChange={handleInputChange} />
+                </div>
+              </form>
+            </ModalBody>
+            <ModalFooter className="flex justify-center gap-3">
+              <SecondaryButton onClick={onClose} btnClassName="font-semibold">
+                Batal
+              </SecondaryButton>
+              <PrimaryButton onClick={handleSubmit} btnClassName="font-semibold">
+                Tambah Pelanggaran
+              </PrimaryButton>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </AuthenticatedLayout>
     </div>
   );

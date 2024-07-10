@@ -1,37 +1,82 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutAdmin/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
+import { Select, Table, Thead, Tbody, Tr, Th, Td, useToast, Skeleton } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
 import { FiSearch } from 'react-icons/fi';
 import Image from 'next/image';
+import axios from 'axios';
 
 export default function ListGuru() {
   const router = useRouter();
-  const [tugas] = React.useState([
-    {
-      id: 1,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika'
-    },
-    {
-      id: 3,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika'
-    },
-    {
-      id: 3,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika'
-    }
-  ]);
-
+  const toast = useToast();
+  const [subjects, setSubjects] = React.useState([]);
+  const [filterMapel, setFilterMapel] = React.useState('');
+  const [guru, setGuru] = React.useState([]);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [loadingSubjects, setLoadingSubjects] = React.useState(true);
+  const [loadingTeachers, setLoadingTeachers] = React.useState(false);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/admin/subjects/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        setSubjects(response.data.data || []);
+        setLoadingSubjects(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching subjects:', error);
+        toast({
+          title: 'Error',
+          description: 'Gagal mengambil data Mapel',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+        setLoadingSubjects(false);
+      });
+  }, [toast]);
+
+  React.useEffect(() => {
+    if (filterMapel) {
+      setLoadingTeachers(true);
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/admin/subjects/${filterMapel}/teachers`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          setGuru(response.data.data || []);
+          setLoadingTeachers(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching teachers:', error);
+          toast({
+            title: 'Error',
+            description: 'Gagal mengambil data Guru',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+          setLoadingTeachers(false);
+        });
+    } else {
+      setGuru([]); // Reset the guru list when filterMapel is empty
+    }
+  }, [filterMapel, toast]);
+
+  const handleChangeFilterMapel = (e) => {
+    setFilterMapel(e.target.value);
   };
 
   return (
@@ -47,10 +92,18 @@ export default function ListGuru() {
               <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
                 Jenis Mata Pelajaran
               </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+              <Select placeholder="Pilih Mata Pelajaran" size="md" name="sort" className="" onChange={handleChangeFilterMapel}>
+                {loadingSubjects
+                  ? Array.from({ length: 3 }).map((_, index) => (
+                      <option key={index} value="">
+                        <Skeleton height="20px" />
+                      </option>
+                    ))
+                  : subjects.map((subject, index) => (
+                      <option key={index} value={subject.id}>
+                        {subject.name}
+                      </option>
+                    ))}
               </Select>
             </span>
             <span className="flex flex-col justify-end w-full gap-4">
@@ -70,39 +123,75 @@ export default function ListGuru() {
             </span>
           </div>
           <div className="m-3 border rounded-lg shadow-sm ">
-            <Table className="">
-              <Thead className="bg-Gray-50">
-                <Tr>
-                  <Th>Nama Guru</Th>
-                  <Th>Mata Pelajaran</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {tugas.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="flex items-center gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.namaguru}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="">
-                        <span className="text-sm font-medium text-Gray-900">{item.namaguru}</span>
-                      </div>
-                    </Td>
-                    <Td>{item.namaMapel}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={() => router.push(`/materi/literasi/${item.id}`)}>
-                        Preview
-                      </SecondaryButton>
-                    </Td>
+            {loadingTeachers ? (
+              <Table className="">
+                <Thead className="bg-Gray-50">
+                  <Tr>
+                    <Th>Nama Guru</Th>
+                    <Th>Mata Pelajaran</Th>
+                    <Th></Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Tr key={index}>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            ) : guru && guru.length > 0 ? (
+              <Table className="">
+                <Thead className="bg-Gray-50">
+                  <Tr>
+                    <Th>Nama Guru</Th>
+                    <Th>Mata Pelajaran</Th>
+                    <Th></Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {guru
+                    .filter((item) => item.teacher_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((item, index) => (
+                      <Tr key={index}>
+                        <Td className="">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={`https://ui-avatars.com/api/?name=${item.teacher_name}`}
+                              alt="Logo"
+                              width={40}
+                              height={24}
+                              className="rounded-full"
+                            />
+                            <div className="">
+                              <span className="text-sm font-medium text-Gray-900">{item.teacher_name}</span>
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>{item.subject_name}</Td>
+                        <Td>
+                          <SecondaryButton
+                            btnClassName="font-semibold w-fit h-fit"
+                            onClick={() => router.push(`/materi/literasi/${item.id}`)}
+                          >
+                            Preview
+                          </SecondaryButton>
+                        </Td>
+                      </Tr>
+                    ))}
+                </Tbody>
+              </Table>
+            ) : (
+              <h1 className="text-center text-lg font-semibold text-Gray-600">Data Kosong</h1>
+            )}
           </div>
         </div>
       </AuthenticatedLayout>

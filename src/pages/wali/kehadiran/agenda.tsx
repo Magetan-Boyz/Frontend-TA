@@ -3,15 +3,15 @@ import AuthenticatedLayout from '@/components/layout/layoutWali/AuthenticatedLay
 // import Navbar from '@/components/Navbar';
 // import { useRouter } from 'next/router';
 import Seo from '@/components/Seo';
-import AgendaCalendarSiswa from '@/components/AgendaCalendarSiswa';
+import AgendaCalendarWali from '@/components/AgendaCalendarWali';
 
 export default function Agenda() {
   return (
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <div className="w-full h-full p-3 rounded-md shadow-lg bg-Base-white">
-          <AgendaCalendarSiswa />
+        <div className="w-full h-full p-3 overflow-y-auto rounded-md shadow-lg bg-Base-white">
+          <AgendaCalendarWali />
         </div>
       </AuthenticatedLayout>
     </div>

@@ -35,6 +35,8 @@ const SubMenu: React.FC<SubMenuProps> = ({ item }) => {
   const handleClick = () => {
     if (item.title === 'Dashboard') {
       router.push(item.path);
+    } else if (item.title === 'Information Center') {
+      router.push(item.path);
     } else {
       setSubnav(!subnav);
     }

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import { Box, useRadio, useRadioGroup, UseRadioProps } from '@chakra-ui/react';
@@ -45,12 +46,12 @@ function RadioCard(props: RadioCardProps) {
 }
 
 export default function PilihanGanda() {
+  const router = useRouter();
   const [pertanyaan, setPertanyaan] = React.useState('');
   const [jawaban, setJawaban] = React.useState('');
   const [option, setOption] = React.useState(['']);
   const [correctAnswer, setCorrectAnswer] = React.useState('');
   const [type] = React.useState('multiple-choice');
-  console.log(correctAnswer);
 
   const handleAddOption = () => {
     setOption([...option, '']);
@@ -66,12 +67,30 @@ export default function PilihanGanda() {
     setOption(newOption);
   };
 
+  const handleSaveQuestion = () => {
+    const newQuestion = {
+      text: pertanyaan,
+      options: option,
+      correct_answer: correctAnswer
+    };
+
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      quizzes[0].questions.push(newQuestion);
+      localStorage.setItem('quizzes', JSON.stringify(quizzes));
+    } else {
+      router.push('/guru/kuis/create');
+    }
+    router.push('/guru/kuis/create');
+  };
+
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: 'framework',
     onChange: (value) => setCorrectAnswer(value)
   });
 
   const group = getRootProps();
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -130,24 +149,12 @@ export default function PilihanGanda() {
                 Tambah Jawaban Lain
               </SecondaryButton>
             </div>
-            <div className="flex flex-col">
-              <label htmlFor="catatan" className="text-sm font-semibold text-Gray-600">
-                Catatan
-              </label>
-              <textarea
-                name="catatan"
-                id="catatan"
-                className="border border-[#D0D5DD] rounded-lg p-2 mt-3"
-                placeholder="Catatan tambahan"
-                value={pertanyaan}
-                onChange={(e) => setPertanyaan(e.target.value)}
-              />
-            </div>
+
             <div className="flex justify-start gap-5">
-              <PrimaryButton btnClassName="w-fit h-fit" onClick={() => console.log('submit')}>
+              <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSaveQuestion}>
                 Simpan
               </PrimaryButton>
-              <SecondaryButton btnClassName="w-fit h-fit" onClick={() => console.log('submit')}>
+              <SecondaryButton btnClassName="w-fit h-fit" onClick={() => router.push('/guru/kuis/create')}>
                 Batalkan
               </SecondaryButton>
             </div>

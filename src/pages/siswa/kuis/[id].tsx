@@ -14,25 +14,20 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  useDisclosure
+  useDisclosure,
+  useToast
 } from '@chakra-ui/react';
 import { LuBookOpen } from 'react-icons/lu';
 import PrimaryButton from '@/components/PrimaryButton';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
 interface Question {
   text: string;
   type_of_question: string;
   options: string[];
   correct_answer: string;
-  number?: number; // This field is optional since it's added later
-}
-
-function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+  number?: number;
 }
 
 interface RadioCardProps extends UseRadioProps {
@@ -74,26 +69,9 @@ function RadioCard(props: RadioCardProps) {
 
 export default function PengerjaanKuis() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialQuestions: Question[] = [
-    {
-      text: 'What is the capital of France?',
-      type_of_question: 'multiple-choice',
-      options: ['Berlin', 'Madrid', 'Paris', 'Rome'],
-      correct_answer: ''
-    },
-    {
-      text: 'Explain the theory of relativity.',
-      type_of_question: 'multiple-choice',
-      options: ['Stalin', 'Einstein', 'Newton', 'Darwin'],
-      correct_answer: ''
-    },
-    {
-      text: 'Write an essay on the theory of relativity.',
-      type_of_question: 'essay',
-      options: [],
-      correct_answer: ''
-    }
-  ];
+  const toast = useToast();
+  const router = useRouter();
+  const { id } = router.query;
 
   const [response, setResponse] = React.useState<{
     id: string;
@@ -106,43 +84,63 @@ export default function PengerjaanKuis() {
     deadline: string;
     questions: Question[];
   }>({
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    class_id: 'class_101',
-    subject_id: 'subject_202',
-    teacher_id: 'teacher_303',
-    title: 'Mid-Term Exam',
-    type_of_quiz: 'UTS',
-    description: 'This is the mid-term exam covering chapters 1 to 5.',
-    deadline: '2024-07-01T23:59:59Z',
+    id: '',
+    class_id: '',
+    subject_id: '',
+    teacher_id: '',
+    title: '',
+    type_of_quiz: '',
+    description: '',
+    deadline: '',
     questions: []
   });
 
-  React.useEffect(() => {
-    const savedQuestions = localStorage.getItem('questions');
-    const savedAnswers = localStorage.getItem('userAnswers');
-    if (savedQuestions) {
-      setResponse((prevState) => ({
-        ...prevState,
-        questions: JSON.parse(savedQuestions) as Question[]
-      }));
-      setUserAnswers(savedAnswers ? JSON.parse(savedAnswers) : []);
-    } else {
-      const shuffledQuestions = shuffleArray([...initialQuestions]);
-      const numberedQuestions = shuffledQuestions.map((question, index) => ({
-        ...question,
-        options: shuffleArray([...question.options]),
-        number: index + 1
-      }));
-      localStorage.setItem('questions', JSON.stringify(numberedQuestions));
-      setResponse((prevState) => ({
-        ...prevState,
-        questions: numberedQuestions
-      }));
-      setUserAnswers(Array(numberedQuestions.length).fill(''));
-    }
-  }, []);
+  const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
 
-  const [userAnswers, setUserAnswers] = React.useState<string[]>(Array(initialQuestions.length).fill(''));
+  React.useEffect(() => {
+    if (id) {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/student/quiz/${id}/questions`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          if (response.data && response.data.data) {
+            const fetchedQuestions = response.data.data;
+            const quizType = response.data.type_of_quiz;
+            const numberedQuestions = fetchedQuestions.map((question, index) => ({
+              ...question,
+              options: [...question.options],
+              number: index + 1
+            }));
+            localStorage.setItem('questions', JSON.stringify(numberedQuestions));
+            setResponse((prevState) => ({
+              ...prevState,
+              questions: numberedQuestions,
+              type_of_quiz: quizType
+            }));
+            setUserAnswers(Array(numberedQuestions.length).fill(''));
+          } else {
+            setResponse((prevState) => ({
+              ...prevState,
+              questions: []
+            }));
+            setUserAnswers([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching quiz questions:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to fetch quiz questions',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+        });
+    }
+  }, [id, toast]);
 
   const handleAnswerChange = (index: number, answer: string) => {
     setUserAnswers((prevAnswers) => {
@@ -183,6 +181,43 @@ export default function PengerjaanKuis() {
   });
 
   const group = getRootProps();
+
+  const handleSubmit = () => {
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_API_URL}/student/quiz/${id}/submit`,
+        { answers: userAnswers },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      )
+      .then(() => {
+        // Clear localStorage
+        localStorage.removeItem('questions');
+        localStorage.removeItem('userAnswers');
+        toast({
+          title: 'Success',
+          description: 'Quiz submitted successfully',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        router.push(`/siswa/kuis/nilai?id=${id}`);
+      })
+      .catch((error) => {
+        console.error('Error submitting quiz:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to submit quiz',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -204,30 +239,34 @@ export default function PengerjaanKuis() {
             </div>
           </div>
           <div className="flex flex-col items-center w-full h-full gap-5 p-5 bg-Base-white">
-            {currentQuestions.map((question, index) => (
-              <div key={index} className="flex flex-col w-full gap-5">
-                <input type="text" value={question.text} disabled className="w-full p-3" />
-                {question.type_of_question === 'multiple-choice' ? (
-                  <div className="flex flex-col w-full gap-5" {...group}>
-                    {question.options.map((value) => {
-                      const radio = getRadioProps({ value });
-                      return (
-                        <RadioCard key={value} {...radio}>
-                          {value}
-                        </RadioCard>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <textarea
-                    value={userAnswers[currentPage - 1]}
-                    onChange={(e) => handleAnswerChange(currentPage - 1, e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-md"
-                    rows={5}
-                  />
-                )}
-              </div>
-            ))}
+            {currentQuestions.length > 0 ? (
+              currentQuestions.map((question, index) => (
+                <div key={index} className="flex flex-col w-full gap-5">
+                  <input type="text" value={question.text} disabled className="w-full p-3" />
+                  {response.type_of_quiz === 'Multiple Choice' ? (
+                    <div className="flex flex-col w-full gap-5" {...group}>
+                      {question.options.map((value) => {
+                        const radio = getRadioProps({ value });
+                        return (
+                          <RadioCard key={value} {...radio}>
+                            {value}
+                          </RadioCard>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <textarea
+                      value={userAnswers[currentPage - 1]}
+                      onChange={(e) => handleAnswerChange(currentPage - 1, e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      rows={5}
+                    />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-5 text-Gray-600">Tidak ada pertanyaan ditemukan</div>
+            )}
             <div id="pagination" className="flex justify-between w-full p-3 border-t border-Gray-200">
               <SecondaryButton
                 btnClassName={`font-semibold w-fit ${currentPage === 1 ? 'text-Gray-300 border-Gray-300' : ''}`}
@@ -239,13 +278,15 @@ export default function PengerjaanKuis() {
               <span className="self-center">
                 Page {currentPage} of {Math.ceil(response.questions.length / itemsPerPage)}
               </span>
-              <SecondaryButton
-                btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(response.questions.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
-                onClick={handleNextPage}
-                disabled={currentPage === Math.ceil(response.questions.length / itemsPerPage)}
-              >
-                Next
-              </SecondaryButton>
+              {currentPage === Math.ceil(response.questions.length / itemsPerPage) ? (
+                <PrimaryButton btnClassName="font-semibold w-fit" onClick={onOpen}>
+                  Finish Attempt
+                </PrimaryButton>
+              ) : (
+                <SecondaryButton btnClassName="font-semibold w-fit" onClick={handleNextPage}>
+                  Next
+                </SecondaryButton>
+              )}
             </div>
           </div>
           <div className="flex flex-col items-center gap-5 p-5 bg-Base-white">
@@ -254,7 +295,7 @@ export default function PengerjaanKuis() {
               {response.questions.map((question, index) => (
                 <button
                   key={index}
-                  className={`w-10 h-10 border rounded-full ${userAnswers[index] ? 'bg-Primary-400 text-Base-white' : currentPage === index + 1 ? 'bg-Primary-400 text-Base-white' : 'bg-Base-white text-Base-black'}`}
+                  className={`w-10 h-10 border rounded-full ${userAnswers[index] ? 'bg-Success-200 text-Base-white' : currentPage === index + 1 ? 'bg-Primary-400 text-Base-white' : 'bg-Base-white text-Base-black'}`}
                   onClick={() => handlePageClick(index + 1)}
                 >
                   {index + 1}
@@ -285,7 +326,7 @@ export default function PengerjaanKuis() {
               <SecondaryButton onClick={onClose} btnClassName="font-semibold">
                 Batal
               </SecondaryButton>
-              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
+              <PrimaryButton onClick={handleSubmit} btnClassName="font-semibold">
                 Konfirmasi
               </PrimaryButton>
             </ModalFooter>

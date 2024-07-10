@@ -14,22 +14,70 @@ import {
   ModalCloseButton,
   ModalBody,
   useDisclosure,
+  useToast,
   ModalFooter
 } from '@chakra-ui/react';
 import PrimaryButton from '@/components/PrimaryButton';
 import { CgCloseO } from 'react-icons/cg';
 import SecondaryButton from '@/components/SecondaryButton';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
 export default function DetailPrestasi() {
+  const router = useRouter();
+  const toast = useToast();
+  const { id } = router.query;
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const item = {
-    id: 1,
-    nama: 'Lomba Menulis Cerpen Kreatif',
-    jenisPrestasi: 'OSN',
-    partisipasi: 'Peserta',
-    tingkat: 'Kabupaten',
-    status: 'Wait Approval'
+  const [item, setItem] = React.useState([]); // Add initial value
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/achivement/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        setItem(response.data.data);
+      });
+  }, []);
+
+  const handleApprove = async () => {
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/teacher/achivement/${id}/update`,
+        {
+          status: 'accepted'
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        onClose();
+        toast({
+          title: 'Success',
+          description: 'Achievement has been successfully approved.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        router.push('/guru/prestasi/list');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to approve achievement.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+      console.error('Error approving achievement:', error);
+    }
   };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -48,34 +96,39 @@ export default function DetailPrestasi() {
                 id="pengaduan"
                 className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
                 placeholder="Tuliskan pengaduan kamu disini"
+                value={item.title}
+                disabled
               />
             </div>
             <div className="flex flex-col gap-3">
               <h1 className="text-sm font-medium text-Gray-700">Jenis Prestasi</h1>
-              <Select placeholder="Pilih Golongan Darah">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="AB">AB</option>
-                <option value="O">O</option>
-              </Select>
+              <input
+                name="pengaduan"
+                id="pengaduan"
+                className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
+                value={item.type_of_achivement}
+                disabled
+              />
             </div>
             <div className="flex flex-col gap-3">
               <h1 className="text-sm font-medium text-Gray-700">Jenis Partisipasi</h1>
-              <Select placeholder="Pilih Golongan Darah">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="AB">AB</option>
-                <option value="O">O</option>
-              </Select>
+              <input
+                name="pengaduan"
+                id="pengaduan"
+                className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
+                value={item.participation}
+                disabled
+              />
             </div>
             <div className="flex flex-col gap-3">
               <h1 className="text-sm font-medium text-Gray-700">Jenis Tingkat</h1>
-              <Select placeholder="Pilih Golongan Darah">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="AB">AB</option>
-                <option value="O">O</option>
-              </Select>
+              <input
+                name="pengaduan"
+                id="pengaduan"
+                className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
+                value={item.level}
+                disabled
+              />
             </div>
             <div className="flex flex-col gap-3">
               <label htmlFor="link" className="text-sm text-Gray-700">
@@ -88,16 +141,18 @@ export default function DetailPrestasi() {
                   id="link"
                   className="w-full p-2 border-0 rounded-r-md focus:outline-none"
                   placeholder="www.example.com"
+                  value={item.evidence}
+                  disabled
                 />
               </div>
             </div>
             <div className="flex flex-col gap-3">
               <label htmlFor="status">Status</label>
-              {item.status === 'Wait Approval' ? (
+              {item.status === 'pending' ? (
                 <Tag colorScheme="blue" borderRadius="full" size="sm" className="w-fit">
                   <TagLabel>Wait Approval</TagLabel>
                 </Tag>
-              ) : item.status === 'Success' ? (
+              ) : item.status === 'accepted' ? (
                 <Tag colorScheme="green" borderRadius="full" size="sm" className="w-fit">
                   <TagLabel>Success</TagLabel>
                 </Tag>
@@ -111,7 +166,9 @@ export default function DetailPrestasi() {
               <Button leftIcon={<CgCloseO />} onClick={onOpen} variant="outline">
                 Decline
               </Button>
-              <PrimaryButton btnClassName="w-fit h-fit rounded-md">Approve</PrimaryButton>
+              <PrimaryButton onClick={handleApprove} btnClassName="w-fit h-fit py-2 rounded-md">
+                Approve
+              </PrimaryButton>
             </div>
           </div>
         </div>

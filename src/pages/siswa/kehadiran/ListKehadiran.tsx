@@ -3,33 +3,56 @@ import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLa
 // import Navbar from '@/components/Navbar';
 import { useRouter } from 'next/router';
 import Seo from '@/components/Seo';
+import axios from 'axios';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Select, Button } from '@chakra-ui/react';
 
 export default function ListKehadiran() {
   const router = useRouter();
-  const user = [
-    {
-      id: 1,
-      matapelajaran: 'Matematika',
-      presentase: '100%',
-      jumlahkehadiran: '10',
-      jumlahpertemuan: '10'
-    },
-    {
-      id: 2,
-      matapelajaran: 'Bahasa Indonesia',
-      presentase: '100%',
-      jumlahkehadiran: '10',
-      jumlahpertemuan: '10'
-    },
-    {
-      id: 3,
-      matapelajaran: 'Bahasa Inggris',
-      presentase: '100%',
-      jumlahkehadiran: '10',
-      jumlahpertemuan: '10'
+  const [attendance, setAttendance] = React.useState([]);
+  const [groupedAttendance, setGroupedAttendance] = React.useState([]);
+  const [username, setUsername] = React.useState('');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUsername(localStorage.getItem('username') || '');
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/student/attedance`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          const data = response.data.data || [];
+          console.log('Fetched Attendance Data:', data); // Add logging
+          setAttendance(data);
+          const groupedData = groupAttendanceBySubject(data);
+          console.log('Grouped Attendance Data:', groupedData); // Add logging
+          setGroupedAttendance(groupedData);
+        });
     }
-  ];
+  }, []);
+
+  const groupAttendanceBySubject = (data) => {
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.subject_name]) {
+        acc[item.subject_name] = {
+          subject_name: item.subject_name,
+          total_attendance: 0,
+          total_meetings: 0
+        };
+      }
+      acc[item.subject_name].total_meetings += 1;
+      if (item.attedance_status === 'Hadir') {
+        acc[item.subject_name].total_attendance += 1;
+      }
+      return acc;
+    }, {});
+
+    return Object.values(grouped).map((item) => ({
+      ...item,
+      attendance_percentage: ((item.total_attendance / item.total_meetings) * 100).toFixed(2) + '%'
+    }));
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -37,7 +60,7 @@ export default function ListKehadiran() {
         <Seo templateTitle="Home" />
         <div className="w-full rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex items-center justify-between p-4">
-            <h1 className="flex items-center gap-2 text-lg font-semibold">Presentase Kehadiran Siswa - Ahmin</h1>
+            <h1 className="flex items-center gap-2 text-lg font-semibold">Presentase Kehadiran Siswa - {username}</h1>
             <div className="flex items-center gap-2">
               <Select placeholder="Kelas" size="md">
                 <option value="1">X</option>
@@ -60,25 +83,33 @@ export default function ListKehadiran() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {user.map((item, index) => (
-                    <Tr key={index}>
-                      <Td>{index + 1}</Td>
-                      <Td>{item.matapelajaran}</Td>
-                      <Td>{item.presentase}</Td>
-                      <Td>{item.jumlahkehadiran}</Td>
-                      <Td>{item.jumlahpertemuan}</Td>
-                      <Td>
-                        <Button
-                          colorScheme="gray"
-                          variant="outline"
-                          size="md"
-                          onClick={() => router.push(`/pengaturan/datadiri/${item.id}`)}
-                        >
-                          Details
-                        </Button>
+                  {groupedAttendance.length === 0 ? (
+                    <Tr>
+                      <Td colSpan={6} className="text-center">
+                        No data available
                       </Td>
                     </Tr>
-                  ))}
+                  ) : (
+                    groupedAttendance.map((item, index) => (
+                      <Tr key={index}>
+                        <Td>{index + 1}</Td>
+                        <Td>{item.subject_name}</Td>
+                        <Td>{item.attendance_percentage}</Td>
+                        <Td>{item.total_attendance}</Td>
+                        <Td>{item.total_meetings}</Td>
+                        <Td>
+                          <Button
+                            colorScheme="gray"
+                            variant="outline"
+                            size="md"
+                            onClick={() => router.push(`/pengaturan/datadiri/${item.subject_name}`)}
+                          >
+                            Details
+                          </Button>
+                        </Td>
+                      </Tr>
+                    ))
+                  )}
                 </Tbody>
               </Table>
             </TableContainer>

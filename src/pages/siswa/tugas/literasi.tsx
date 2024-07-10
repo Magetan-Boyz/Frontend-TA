@@ -1,37 +1,39 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
+import { Select, Table, Thead, Tbody, Tr, Th, Td, Skeleton } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
-import { useRouter } from 'next/router';
 import PrimaryButton from '@/components/PrimaryButton';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
 export default function Literasi() {
   const router = useRouter();
-  const [tugas] = React.useState([
-    {
-      id: 3,
-      judul: 'Materi 1',
-      tanggal: '10/10/2021',
-      total: '10',
-      catatan: 'Bagus'
-    },
-    {
-      id: 3,
-      judul: 'Materi 1',
-      tanggal: '10/10/2021',
-      total: '10',
-      catatan: 'Bagus'
-    },
-    {
-      id: 3,
-      judul: 'Materi 1',
-      tanggal: '10/10/2021',
-      total: '10',
-      catatan: 'Bagus'
-    }
-  ]);
+  const [literations, setLiterations] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/student/literation`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          setLiterations(response.data.data);
+        } else {
+          setError('No data available');
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch data');
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div>
@@ -40,7 +42,7 @@ export default function Literasi() {
         <div className="w-full p-3 border rounded-md shadow-lg h-fit border-Gray-200 bg-Base-white">
           <div className="flex items-center justify-between p-3 lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">Detail Pengumpulan</h1>
-            <PrimaryButton btnClassName="w-fit h-fit" onClick={() => router.push('')}>
+            <PrimaryButton btnClassName="w-fit h-fit" onClick={() => router.push('/siswa/tugas/literasi/create')}>
               Tambah Literasi
             </PrimaryButton>
           </div>
@@ -60,27 +62,75 @@ export default function Literasi() {
             <Table className="">
               <Thead className="bg-Gray-50">
                 <Tr>
-                  <Th>Tanggal Pengumpulan</Th>
                   <Th>Judul Literasi</Th>
-                  <Th>Total Points</Th>
-                  <Th>Catatan dari guru</Th>
+                  <Th>Deskripsi</Th>
+                  <Th>Feedback</Th>
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {tugas.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>{item.tanggal}</Td>
-                    <Td>{item.judul}</Td>
-                    <Td>{item.total}/50</Td>
-                    <Td>{item.catatan}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={() => router.push(`/materi/literasi/${item.id}`)}>
-                        Details
-                      </SecondaryButton>
+                {loading ? (
+                  <>
+                    <Tr>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td></Td>
+                    </Tr>
+                    <Tr>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
+                      <Td></Td>
+                    </Tr>
+                  </>
+                ) : error ? (
+                  <Tr>
+                    <Td colSpan={5} className="text-center py-5 text-Gray-600">
+                      {error}
                     </Td>
                   </Tr>
-                ))}
+                ) : literations.length > 0 ? (
+                  literations.map((item, index) => (
+                    <Tr key={index}>
+                      <Td>{item.title}</Td>
+                      <Td>{item.description}</Td>
+                      <Td>{item.feedback}</Td>
+                      <Td>
+                        <SecondaryButton
+                          btnClassName="font-semibold w-fit h-fit"
+                          onClick={() => router.push(`/siswa/tugas/literasi/${item.id}`)}
+                        >
+                          Details
+                        </SecondaryButton>
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan={5} className="text-center py-5 text-Gray-600">
+                      Tidak ada literasi yang tersedia.
+                    </Td>
+                  </Tr>
+                )}
               </Tbody>
             </Table>
           </div>

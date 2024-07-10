@@ -1,63 +1,46 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel } from '@chakra-ui/react';
+import { Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel, Select, Skeleton, Box, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import SecondaryButton from '@/components/SecondaryButton';
 import { FaFilePdf } from 'react-icons/fa';
+import axios from 'axios';
 
 export default function Dispensasi() {
   const router = useRouter();
-  const [user, setUser] = React.useState([
-    {
-      id: 1,
-      nama: 'Dominica',
-      keterangan: 'Lomba O2SN',
-      tanggalMulai: '18/05/2022',
-      tanggalAkhir: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Wait Approval'
-    },
-    {
-      id: 2,
-      nama: 'Dominica',
-      keterangan: 'Lomba OSN',
-      tanggalMulai: '18/05/2022',
-      tanggalAkhir: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Success'
-    },
-    {
-      id: 3,
-      nama: 'Dominica',
-      keterangan: 'Lomba FLS2N',
-      tanggalMulai: '18/05/2022',
-      tanggalAkhir: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Wait Approval'
-    },
-    {
-      id: 4,
-      nama: 'Dominica',
-      keterangan: 'Kirab Budaya',
-      tanggalMulai: '18/05/2022',
-      tanggalAkhir: '18/05/2022',
-      dokumen: 'Surat Izin Dispen.pdf',
-      ukuranDokumen: '200 KB',
-      status: 'Declined'
-    }
-  ]);
+  const [dispensations, setDispensations] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/dispensation`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setDispensations(response.data.data);
+      } catch (error) {
+        console.error('Error fetching dispensations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleApprove = (id: number) => {
-    setUser((prevUsers) => prevUsers.map((user) => (user.id === id ? { ...user, status: 'Success' } : user)));
+    setDispensations((prevDispensations) =>
+      prevDispensations.map((dispensation) => (dispensation.id === id ? { ...dispensation, status: 'Success' } : dispensation))
+    );
   };
 
   const handleDecline = (id: number) => {
-    setUser((prevUsers) => prevUsers.map((user) => (user.id === id ? { ...user, status: 'Declined' } : user)));
+    setDispensations((prevDispensations) =>
+      prevDispensations.map((dispensation) => (dispensation.id === id ? { ...dispensation, status: 'Declined' } : dispensation))
+    );
   };
 
   return (
@@ -89,63 +72,95 @@ export default function Dispensasi() {
                 </Tr>
               </Thead>
               <Tbody>
-                {user.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="flex items-center gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.nama}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="">
-                        <span className="text-sm font-medium text-Gray-900">{item.nama}</span>
-                      </div>
-                    </Td>
-                    <Td className="text-sm text-Gray-900">{item.keterangan}</Td>
-                    <Td className="text-sm text-Gray-900">{item.tanggalMulai}</Td>
-                    <Td className="text-sm text-Gray-900">{item.tanggalAkhir}</Td>
-                    <Td className="flex items-center gap-2 text-sm text-Gray-900">
-                      <FaFilePdf className="text-2xl text-Error-500" />
-                      <div className="text-xs text-Gray-500">
-                        <h1>{item.dokumen}</h1>
-                        <h1>{item.ukuranDokumen}</h1>
-                      </div>
-                    </Td>
-                    <Td>
-                      {item.status === 'Wait Approval' ? (
-                        <Tag colorScheme="blue" borderRadius="full" size="sm">
-                          <TagLabel>Wait Approval</TagLabel>
-                        </Tag>
-                      ) : item.status === 'Success' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Success</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Declined</TagLabel>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      {item.status === 'Wait Approval' ? (
-                        <div className="flex flex-col items-center gap-4 lg:flex-row lg:gap-0">
-                          <button className="mr-2 font-semibold" onClick={() => handleDecline(item.id)}>
-                            Decline
-                          </button>
-                          <button className="font-semibold text-Success-500" onClick={() => handleApprove(item.id)}>
-                            Approve
-                          </button>
-                        </div>
-                      ) : (
-                        <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/dispensasi/detail/${item.id}`)}>
-                          Details
-                        </SecondaryButton>
-                      )}
+                {loading ? (
+                  <>
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <Tr key={index}>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                      </Tr>
+                    ))}
+                  </>
+                ) : dispensations.length === 0 ? (
+                  <Tr>
+                    <Td colSpan={7}>
+                      <Box textAlign="center" py={10}>
+                        <Text fontSize="lg" color="gray.500">
+                          Data Kosong
+                        </Text>
+                      </Box>
                     </Td>
                   </Tr>
-                ))}
+                ) : (
+                  dispensations.map((item, index) => (
+                    <Tr key={index}>
+                      <Td className="">
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={`https://ui-avatars.com/api/?name=${item.student}`}
+                            alt="Logo"
+                            width={40}
+                            height={24}
+                            className="rounded-full"
+                          />
+                          <div className="">
+                            <span className="text-sm font-medium text-Gray-900">{item.student}</span>
+                          </div>
+                        </div>
+                      </Td>
+                      <Td className="text-sm text-Gray-900">{item.reason}</Td>
+                      <Td className="text-sm text-Gray-900">{item.start_at}</Td>
+                      <Td className="text-sm text-Gray-900">{item.end_at}</Td>
+                      <Td className=" text-sm text-Gray-900">
+                        <div className="flex items-center gap-2">
+                          <FaFilePdf className="text-2xl text-Error-500" />
+                          <div className="text-xs text-Gray-500">
+                            <h1>{item.document.slice(0, 12) + '...'}</h1>
+                          </div>
+                        </div>
+                      </Td>
+                      <Td>
+                        {item.status === 'pending' ? (
+                          <Tag colorScheme="blue" borderRadius="full" size="sm">
+                            <TagLabel>Wait Approval</TagLabel>
+                          </Tag>
+                        ) : item.status === 'accepted' ? (
+                          <Tag colorScheme="green" borderRadius="full" size="sm">
+                            <TagLabel>Success</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Tag colorScheme="red" borderRadius="full" size="sm">
+                            <TagLabel>Declined</TagLabel>
+                          </Tag>
+                        )}
+                      </Td>
+                      <Td>
+                        <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/guru/pengaturan/dispensasi/${item.id}`)}>
+                          Details
+                        </SecondaryButton>
+                      </Td>
+                    </Tr>
+                  ))
+                )}
               </Tbody>
             </Table>
           </div>

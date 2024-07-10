@@ -1,33 +1,74 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Input, Select, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
+import { Input, Select, Table, Thead, Tbody, Tr, Th, Td, Spinner } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 export default function Literasi() {
   const router = useRouter();
-  const [tugas] = React.useState([
-    {
-      id: 1,
-      kelas: '1',
-      totalSiswa: '10',
-      totalSubmit: '9'
-    },
-    {
-      id: 2,
-      kelas: '2',
-      totalSiswa: '10',
-      totalSubmit: '9'
-    },
-    {
-      id: 3,
-      kelas: '3',
-      totalSiswa: '10',
-      totalSubmit: '9'
+  const [classes, setClasses] = React.useState([]);
+  const [literations, setLiterations] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [selectedClass, setSelectedClass] = React.useState('');
+
+  React.useEffect(() => {
+    fetchClassData();
+    fetchLiterationData();
+  }, []);
+
+  const fetchClassData = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setClasses(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
     }
-  ]);
+  };
+
+  const fetchLiterationData = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/literation`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setLiterations(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching literation data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTotalSubmit = (classId) => {
+    return literations.filter((literation) => literation.student_class_id === classId).length;
+  };
+
+  const handleClassChange = (e) => {
+    setSelectedClass(e.target.value);
+  };
+
+  const filteredClasses = selectedClass ? classes.filter((cls) => cls.class_id === selectedClass) : classes;
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout>
+        <Seo templateTitle="Home" />
+        <div className="w-full p-3 border rounded-md shadow-lg h-fit border-Gray-200 bg-Base-white flex justify-center items-center">
+          <Spinner size="xl" />
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -36,10 +77,13 @@ export default function Literasi() {
           <div className="p-3 lg:justify-between lg:flex lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">List Pengumpulan Literasi</h1>
             <div className="">
-              <Select placeholder="Kelas" size="md">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+              <Select placeholder="Pilih Kelas" size="md" onChange={handleClassChange}>
+                <option value="">Semua Kelas</option>
+                {classes.map((cls) => (
+                  <option key={cls.class_id} value={cls.class_id}>
+                    {cls.class_name}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
@@ -55,25 +99,41 @@ export default function Literasi() {
             <Table className="">
               <Thead className="bg-Gray-50">
                 <Tr>
-                  <Th>Nama Tugas</Th>
-                  <Th>Total Siswa</Th>
+                  <Th>Kelas</Th>
                   <Th>Total Submit</Th>
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {tugas.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="font-semibold">{item.kelas}</Td>
-                    <Td>{item.totalSiswa}</Td>
-                    <Td>{item.totalSubmit}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/literasi/${item.id}`)}>
-                        Detail
-                      </SecondaryButton>
+                {filteredClasses.length > 0 ? (
+                  filteredClasses.map((cls) => (
+                    <Tr key={cls.class_id}>
+                      <Td className="font-semibold">{cls.class_name}</Td>
+
+                      <Td>{getTotalSubmit(cls.class_id)}</Td>
+                      <Td>
+                        <SecondaryButton
+                          size="mini"
+                          btnClassName="font-semibold"
+                          onClick={() =>
+                            router.push({
+                              pathname: `/guru/tugas/literasi/${cls.class_id}`,
+                              query: { classId: cls.class_id }
+                            })
+                          }
+                        >
+                          Detail
+                        </SecondaryButton>
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan="4" className="text-center">
+                      Tidak ada data kelas yang ditemukan.
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </div>

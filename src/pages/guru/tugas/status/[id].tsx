@@ -1,43 +1,62 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel } from '@chakra-ui/react';
+import { Select, Table, Thead, Tr, Tbody, Th, Td, Tag, TagLabel, Spinner } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 import Image from 'next/image';
 
 export default function Status() {
   const router = useRouter();
-  const [user] = React.useState([
-    {
-      id: 1,
-      nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
-      email: 'dominica@gmail.com',
-      totalpoint: '10',
-      status: 'Pass',
-      nis: '1234567890'
-    },
-    {
-      id: 2,
-      nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
-      email: 'dominica@gmail.com',
-      totalpoint: '10',
-      status: 'Pending',
-      nis: '1234567890'
-    },
-    {
-      id: 3,
-      nama: 'Dominica',
-      tanggal: 'January 6, 2023 11:59 AM',
-      email: 'dominica@gmail.com',
-      totalpoint: '10',
-      status: 'Pending',
-      nis: '1234567890'
-    }
-  ]);
+  const { id } = router.query; // Get the task ID from the URL
+  const [assignments, setAssignments] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [sortOrder, setSortOrder] = React.useState('newest'); // Add state for sort order
+
+  React.useEffect(() => {
+    const fetchAssignments = async () => {
+      if (!id) {
+        setLoading(false); // Set loading to false if taskId is not available
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/task/${id}/assignment`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setAssignments(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching assignments:', error);
+        setAssignments([]);
+      }
+    };
+
+    fetchAssignments();
+  }, [id]);
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
+  };
+
+  const handleSortChange = (e) => {
+    const value = e.target.value;
+    setSortOrder(value);
+
+    const sortedAssignments = [...assignments].sort((a, b) => {
+      const dateA = new Date(a.submit_at);
+      const dateB = new Date(b.submit_at);
+
+      return value === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    setAssignments(sortedAssignments);
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -61,67 +80,78 @@ export default function Status() {
             <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
               Sort By
             </label>
-            <Select placeholder="Urutkan" size="md" name="sort" className="">
-              <option value="1">X</option>
-              <option value="2">XI</option>
-              <option value="3">XII</option>
+            <Select placeholder="All" size="md" name="sort" className="w-fit" onChange={handleSortChange}>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
             </Select>
           </div>
           <div className="m-3 border rounded-lg shadow-sm ">
-            <Table className="">
-              <Thead className="bg-Gray-50">
-                <Tr>
-                  <Th>Tanggal</Th>
-                  <Th>Nama Siswa</Th>
-                  <Th>NIS</Th>
-                  <Th>Total Point</Th>
-                  <Th>Status Submit</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {user.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="text-sm text-Gray-900">{item.tanggal}</Td>
-                    <Td className="flex gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.nama}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-Gray-900">{item.nama}</span>{' '}
-                        <span className="text-sm text-Gray-600">{item.email}</span>
-                      </div>
-                    </Td>
-                    <Td className="text-sm text-Gray-900">{item.nis}</Td>
-                    <Td className="text-sm text-Gray-900">{item.totalpoint}/50</Td>
-                    <Td>
-                      {item.status === 'Pending' ? (
-                        <Tag colorScheme="blue" borderRadius="full" size="sm">
-                          <TagLabel>Pending</TagLabel>
-                        </Tag>
-                      ) : item.status === 'Pass' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Pass</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Fail</TagLabel>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/status/detail/${item.id}`)}>
-                        {item.status === 'Pending' ? 'Evaluate' : 'Detail'}
-                      </SecondaryButton>
-                    </Td>
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <Spinner size="xl" />
+              </div>
+            ) : (
+              <Table className="">
+                <Thead className="bg-Gray-50">
+                  <Tr>
+                    <Th>Tanggal</Th>
+                    <Th>Nama Siswa</Th>
+                    <Th>Total Point</Th>
+                    <Th>Status Submit</Th>
+                    <Th></Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {assignments.length === 0 ? (
+                    <Tr>
+                      <Td colSpan="6" className="text-center">
+                        Tidak ada data pengumpulan
+                      </Td>
+                    </Tr>
+                  ) : (
+                    assignments.map((assignment, index) => (
+                      <Tr key={index}>
+                        <Td className="text-sm text-Gray-900">{formatDate(assignment.submit_at)}</Td>
+                        <Td className="">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={`https://ui-avatars.com/api/?name=${assignment.student}`}
+                              alt="Logo"
+                              width={40}
+                              height={24}
+                              className="rounded-full"
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-Gray-900">{assignment.student}</span>{' '}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td className="text-sm text-Gray-900">{assignment.grade}/50</Td>
+                        <Td>
+                          {assignment.feedback === 'Menunggu untuk dinilai guru' ? (
+                            <Tag colorScheme="blue" borderRadius="full" size="sm">
+                              <TagLabel>Pending</TagLabel>
+                            </Tag>
+                          ) : (
+                            <Tag colorScheme="green" borderRadius="full" size="sm">
+                              <TagLabel>Graded</TagLabel>
+                            </Tag>
+                          )}
+                        </Td>
+                        <Td>
+                          <SecondaryButton
+                            btnClassName="font-semibold"
+                            onClick={() => router.push(`/guru/tugas/status/detail/${assignment.id}`)}
+                          >
+                            {assignment.feedback === 'Menunggu untuk dinilai guru' ? 'Evaluate' : 'Detail'}
+                          </SecondaryButton>
+                        </Td>
+                      </Tr>
+                    ))
+                  )}
+                </Tbody>
+              </Table>
+            )}
           </div>
         </div>
       </AuthenticatedLayout>

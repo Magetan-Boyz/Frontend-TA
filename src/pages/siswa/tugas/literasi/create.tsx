@@ -1,23 +1,53 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import Seo from '@/components/Seo';
-import { Button } from '@chakra-ui/react';
-import { FiUploadCloud } from 'react-icons/fi';
+import { Button, useToast } from '@chakra-ui/react';
 import PrimaryButton from '@/components/PrimaryButton';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
 export default function CreateLiterasi() {
-  const [files, setFiles] = React.useState<string | null>(null);
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [documentLink, setDocumentLink] = React.useState('');
+  const toast = useToast();
+  const router = useRouter();
 
-  const handleDragOver = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    if (selectedFiles) {
-      setFiles(selectedFiles[0].name);
-    }
+  const handleSubmit = () => {
+    const data = {
+      title,
+      description,
+      documents: documentLink
+    };
+
+    axios
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/student/literation/create`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then(() => {
+        toast({
+          title: 'Success',
+          description: 'Literation created successfully',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        router.push('/siswa/tugas/literasi');
+      })
+      .catch((error) => {
+        console.error('Error creating literation:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to create literation',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
   };
 
-  const handleClearFiles = () => {
-    setFiles(null);
-  };
   return (
     <div>
       <AuthenticatedLayout>
@@ -26,10 +56,9 @@ export default function CreateLiterasi() {
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">Tambah Literasi</h1>
             <div className="flex items-center justify-between gap-8">
-              <h1>
-                Tanggal Literasi : <span className="font-semibold">06 January, 2023</span>
-              </h1>
-              <PrimaryButton btnClassName="w-fit h-fit">Submit Literasi</PrimaryButton>
+              <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSubmit}>
+                Submit Literasi
+              </PrimaryButton>
             </div>
           </div>
           <div className="flex flex-col gap-5 p-3">
@@ -43,6 +72,8 @@ export default function CreateLiterasi() {
                 id="judul"
                 className="w-full p-2 border rounded-lg border-Gray-200"
                 placeholder="Tuliskan judul literasi kamu disini"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-3">
@@ -54,31 +85,23 @@ export default function CreateLiterasi() {
                 id="hasil"
                 className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
                 placeholder="Tuliskan hasil kamu disini"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-3">
-              <h1 className="text-sm font-medium text-Gray-700">Tambahkan dokumen pendukung (Opsional)</h1>
-              <div className="p-5 border rounded-xl border-Gray-200">
-                {files ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <h1 className="text-Gray-600">{files}</h1>
-                    <Button colorScheme="gray" onClick={handleClearFiles}>
-                      Clear
-                    </Button>
-                  </div>
-                ) : (
-                  <label htmlFor="thumbnail" className="flex flex-col items-center gap-2">
-                    <div className="p-2 border rounded-lg w-fit h-fit">
-                      <FiUploadCloud className="text-xl text-Gray-600" />
-                    </div>
-                    <h1 className="text-Gray-600">
-                      <span className="text-sm font-semibold text-Primary-700">Click to Upload</span> or Drag and Drop
-                    </h1>
-                    <h1 className="text-sm text-Gray-600 ">SVG, PNG, JPG or GIF (max. 800x400px)</h1>
-                  </label>
-                )}
-              </div>
-              <input type="file" name="thumbnail" id="thumbnail" onChange={handleDragOver} className="hidden" />
+              <label htmlFor="documentLink" className="text-sm font-medium text-Gray-700">
+                Link Dokumen Pendukung
+              </label>
+              <input
+                type="text"
+                name="documentLink"
+                id="documentLink"
+                className="w-full p-2 border rounded-lg border-Gray-200"
+                placeholder="Masukkan link dokumen pendukung"
+                value={documentLink}
+                onChange={(e) => setDocumentLink(e.target.value)}
+              />
             </div>
           </div>
         </div>

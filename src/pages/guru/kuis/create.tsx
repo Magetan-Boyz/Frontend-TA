@@ -6,36 +6,86 @@ import * as React from 'react';
 import { BsEye } from 'react-icons/bs';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { HiDotsVertical } from 'react-icons/hi';
-import { Menu, MenuButton, IconButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { Menu, MenuButton, IconButton, MenuList, MenuItem, useToast } from '@chakra-ui/react';
 import { MdAdd } from 'react-icons/md';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
-export default function create() {
-  const [question] = React.useState([
-    {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      judul: 'Proses memasak makanan pada tumbuhan disebut?',
-      deskripsi: 'Deskripsi Matematika',
-      kelas: 'XII',
-      deadline: '12-12-2021',
-      type: 'Pilihan Ganda'
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      judul: 'Proses memasak makanan pada tumbuhan disebut?',
-      deskripsi: 'Deskripsi Matematika',
-      kelas: 'XII',
-      deadline: '12-12-2021',
-      type: 'Pilihan Ganda'
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440002',
-      judul: 'Proses memasak makanan pada tumbuhan disebut?',
-      deskripsi: 'Deskripsi Matematika',
-      kelas: 'XII',
-      deadline: '12-12-2021',
-      type: 'Pilihan Ganda'
+export default function CreateKuis() {
+  const [questions, setQuestions] = React.useState([]);
+  const router = useRouter();
+  const toast = useToast();
+
+  React.useEffect(() => {
+    const class_id = localStorage.getItem('class_id');
+    const subject_id = localStorage.getItem('subject_id');
+    if (!class_id || !subject_id) {
+      toast({
+        title: 'Error',
+        description: 'Missing class or subject ID',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+      router.push('/guru/kuis/list');
     }
-  ]);
+
+    // Fetch questions from localStorage
+    const storedQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    const storedQuestions = storedQuizzes.length > 0 ? storedQuizzes[0].questions : [];
+    setQuestions(storedQuestions);
+  }, [toast, router]);
+
+  const handleAddQuestion = () => {
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      const quizType = quizzes[0].type_of_quiz;
+      if (quizType === 'Multiple Choice') {
+        router.push('/guru/kuis/question/pilihanganda');
+      } else if (quizType === 'Essay') {
+        router.push('/guru/kuis/question/essay');
+      }
+    }
+  };
+
+  const handleSaveQuiz = () => {
+    const class_id = localStorage.getItem('class_id');
+    const subject_id = localStorage.getItem('subject_id');
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      const quizData = quizzes[0];
+      axios
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/${class_id}/${subject_id}/create`, quizData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          toast({
+            title: 'Success',
+            description: 'Quiz created successfully',
+            status: 'success',
+            duration: 5000,
+            isClosable: true
+          });
+          localStorage.removeItem('quizzes');
+          localStorage.removeItem('class_id');
+          localStorage.removeItem('subject_id');
+          router.push('/guru/kuis/list');
+        })
+        .catch((error) => {
+          console.error('Error creating quiz:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to create quiz',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+        });
+    }
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -54,31 +104,31 @@ export default function create() {
               <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<BsEye className="text-lg" />} onClick={() => console.log('clicked')}>
                 Preview
               </SecondaryButton>
-              <PrimaryButton btnClassName="w-fit h-fit" onClick={() => console.log('clicked')}>
+              <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSaveQuiz}>
                 Simpan
               </PrimaryButton>
             </div>
           </div>
-          {question.map((item, index) => (
-            <div className="flex items-center justify-between w-full p-5 border-b h-fit bg-Gray-50 border-Gray-200" key={index}>
-              <div className="flex gap-3">
-                <label htmlFor={item.id}>{item.judul}</label>
+          {questions.length > 0 ? (
+            questions.map((item, index) => (
+              <div className="flex items-center justify-between w-full p-5 border-b h-fit bg-Gray-50 border-Gray-200" key={index}>
+                <div className="flex gap-3">
+                  <label htmlFor={item.text}>{item.text}</label>
+                </div>
+                <Menu>
+                  <MenuButton as={IconButton} icon={<HiDotsVertical className="text-Gray-500" />} variant="ghost" />
+                  <MenuList>
+                    <MenuItem icon={<FiEdit />}>Edit</MenuItem>
+                    <MenuItem icon={<FiTrash2 />}>Delete</MenuItem>
+                  </MenuList>
+                </Menu>
               </div>
-              <Menu>
-                <MenuButton as={IconButton} icon={<HiDotsVertical className="text-Gray-500" />} variant="ghost" />
-                <MenuList>
-                  <MenuItem icon={<FiEdit />}>Edit</MenuItem>
-                  <MenuItem icon={<FiTrash2 />}>Delete</MenuItem>
-                </MenuList>
-              </Menu>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="text-center py-5 text-Gray-600">Tidak ada pertanyaan ditemukan</div>
+          )}
           <div className="px-5 pt-5 pb-10 lg:flex lg:justify-end">
-            <SecondaryButton
-              btnClassName="w-full h-fit lg:w-fit"
-              leftIcon={<MdAdd className="text-lg" />}
-              onClick={() => console.log('clicked')}
-            >
+            <SecondaryButton btnClassName="w-full h-fit lg:w-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddQuestion}>
               Pertanyaan
             </SecondaryButton>
           </div>

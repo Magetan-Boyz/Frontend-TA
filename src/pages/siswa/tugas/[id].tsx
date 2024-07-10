@@ -2,7 +2,7 @@ import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import PrimaryButton from '@/components/PrimaryButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Tag,
   TagLabel,
@@ -13,27 +13,70 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure
+  useDisclosure,
+  useToast
 } from '@chakra-ui/react';
-import { FiInfo } from 'react-icons/fi';
 import SecondaryButton from '@/components/SecondaryButton';
 import { PiFlagBannerBold } from 'react-icons/pi';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
 export default function Tugas() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+  const router = useRouter();
+  const { id, title } = router.query;
+  const [submission, setSubmission] = useState('');
+
+  const username = localStorage.getItem('username');
 
   const handleSubmit = () => {
-    setIsSubmitted(true);
-    onClose();
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_API_URL}/student/task/${id}/assignment`,
+        { submission },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      )
+      .then(() => {
+        setIsSubmitted(true);
+        toast({
+          title: 'Success',
+          description: 'Task submitted successfully',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        onClose();
+      })
+      .catch((error) => {
+        console.error('Error submitting task:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to submit task',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
   };
+
+  useEffect(() => {
+    if (!id || !title) {
+      router.push(`/siswa/tugas/${id}`);
+    }
+  }, [id, title]);
 
   return (
     <AuthenticatedLayout>
       <Seo templateTitle="Tugas" />
       <div className="w-full p-3 border rounded-md shadow-lg h-fit border-Gray-200 bg-Base-white">
         <div className="flex flex-col justify-between gap-5 p-3 lg:border-b lg:items-center lg:flex-row lg:border-Gray-200">
-          <h1 className="font-semibold ">Buatlah Artikel Mengenai Lingkungan di Sekitarmu</h1>
+          <h1 className="font-semibold ">{title}</h1>
           {isSubmitted ? (
             <PrimaryButton btnClassName="w-fit h-fit">Edit Tugas</PrimaryButton>
           ) : (
@@ -76,8 +119,10 @@ export default function Tugas() {
         {isSubmitted && (
           <div className="p-3 border-t border-gray-200">
             <div className="flex flex-col py-5 lg:flex-row lg:gap-10">
-              <h3 className="text-sm font-medium">Tugas Harian</h3>
-              <p className="text-Gray-500">Olivia Rhye - Tugas Artikel - VII A</p>
+              <h3 className="text-sm font-medium">{title}</h3>
+              <p className="text-Gray-500">
+                {username} - {title}
+              </p>
             </div>
             <div className="flex flex-col py-5 lg:flex-row lg:gap-10">
               <h3 className="text-sm font-medium">Link Pengumpulan</h3>
@@ -104,32 +149,15 @@ export default function Tugas() {
             <h1 className="text-lg font-semibold">Tugas</h1>
             <p className="text-sm font-light text-Gray-600">Isi kolom berikut untuk menambah atau mengedit tugas</p>
             <form action="" className="mt-3">
-              <label htmlFor="judul" className="text-sm text-Gray-600">
-                Judul
+              <label htmlFor="submission" className="text-sm text-Gray-600">
+                Submission
               </label>
-              <input type="text" id="judul" className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300" />
-              <div className="flex flex-col mt-2 mb-2">
-                <label htmlFor="jenis" className="text-sm text-Gray-600">
-                  Jenis Tugas
-                </label>
-                <input name="jenis" id="jenis" className="p-2 mt-2 border-2 rounded-md border-Gray-300" />
-              </div>
-              <label htmlFor="link" className="text-sm text-Gray-600">
-                Link
-              </label>
-              <div className="relative flex items-center mt-2 mb-2 border-2 rounded-md border-Gray-300">
-                <span className="px-3 border-r text-Gray-600">https://</span>
-                <input
-                  type="text"
-                  id="link"
-                  className="w-full p-2 border-0 rounded-r-md focus:outline-none"
-                  placeholder="www.example.com"
-                />
-              </div>
-              <div className="flex w-full gap-2 text-Gray-600">
-                <FiInfo className="text-md" />
-                <p className="text-sm">Masukkan link pengumpulan disini</p>
-              </div>
+              <textarea
+                id="submission"
+                value={submission}
+                onChange={(e) => setSubmission(e.target.value)}
+                className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300"
+              />
             </form>
           </ModalBody>
           <ModalFooter className="flex justify-center gap-3">

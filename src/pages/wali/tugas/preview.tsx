@@ -1,20 +1,23 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutWali/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { DayPicker, DayMouseEventHandler } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import { isSameDay } from 'date-fns';
-import { Select, Button, Tag, TagLabel } from '@chakra-ui/react';
+import { Select, Button, Tag, TagLabel, Skeleton } from '@chakra-ui/react';
 import { FiSearch, FiCalendar, FiBook } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { PiListBulletsBold } from 'react-icons/pi';
+import axios from 'axios';
 
 export default function PreviewTugas() {
   const initiallySelectedDate = new Date();
   const [disabledDays, setDisabledDays] = React.useState([]);
   const [selectedDates, setSelectedDates] = React.useState([initiallySelectedDate]);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [tasks, setTasks] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const calendarContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -23,6 +26,28 @@ export default function PreviewTugas() {
     const holidays = hd.getHolidays(currentYear);
     const holidayDates = holidays.map((holiday) => new Date(holiday.date));
     setDisabledDays(holidayDates);
+  }, []);
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/parent/task`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          setTasks(response.data.data);
+        } else {
+          setError('No data available');
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch data');
+        setLoading(false);
+      });
   }, []);
 
   const handleDayClick: DayMouseEventHandler = (day) => {
@@ -37,34 +62,7 @@ export default function PreviewTugas() {
     setSearchTerm(event.target.value);
   };
 
-  const tugas = [
-    {
-      id: 1,
-      nama: 'Buatlah Artikel mengenai Lingkungan disekitarmu',
-      startDate: '2022-10-06',
-      endDate: '2022-10-20',
-      jenisTugas: 'Essay',
-      status: 'Selesai'
-    },
-    {
-      id: 2,
-      nama: 'Tugas Matematika',
-      startDate: '2022-11-01',
-      endDate: '2022-11-15',
-      jenisTugas: 'Latihan',
-      status: 'Belum Selesai'
-    },
-    {
-      id: 3,
-      nama: 'Prakarya: Buat Kerajinan Tangan',
-      startDate: '2022-09-01',
-      endDate: '2022-09-10',
-      jenisTugas: 'Proyek',
-      status: 'Terlambat'
-    }
-  ];
-
-  const filteredTugas = tugas.filter((task) => task.nama.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredTasks = tasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div>
@@ -120,48 +118,52 @@ export default function PreviewTugas() {
             <Button variant="outline">Cek Semua Tugas</Button>
           </div>
           <div className="grid grid-cols-1 gap-4 mt-4">
-            {filteredTugas.map((task) => (
-              <div key={task.id} className="p-4 border rounded-md shadow-sm">
-                <div className="flex justify-between">
-                  <div>
-                    <h2 className="font-semibold text-[#6941C6]">Tugas</h2>
-                    <h3 className="mt-2 text-lg font-bold">{task.nama}</h3>
-                  </div>
-                  <div className="flex items-center">
-                    {task.status === 'Selesai' ? (
-                      <Tag colorScheme="gray" borderRadius="full" size="sm" className="h-fit">
-                        <TagLabel>Sudah Mengumpulkan</TagLabel>
-                      </Tag>
-                    ) : task.status === 'Belum Selesai' ? (
+            {loading ? (
+              <>
+                <Skeleton height="20px" />
+                <Skeleton height="20px" />
+                <Skeleton height="20px" />
+                <Skeleton height="20px" />
+                <Skeleton height="20px" />
+              </>
+            ) : error ? (
+              <div className="text-center py-5 text-Gray-600">{error}</div>
+            ) : filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
+                <div key={task.id} className="p-4 border rounded-md shadow-sm">
+                  <div className="flex justify-between">
+                    <div>
+                      <h2 className="font-semibold text-[#6941C6]">Tugas</h2>
+                      <h3 className="mt-2 text-lg font-bold">{task.title}</h3>
+                    </div>
+                    <div className="flex items-center">
                       <Tag colorScheme="purple" borderRadius="full" size="sm" className="h-fit">
-                        <TagLabel>Belum Mengumpulkan</TagLabel>
+                        <TagLabel>{task.type_of_task}</TagLabel>
                       </Tag>
-                    ) : (
-                      <Tag colorScheme="gray" borderRadius="full" size="sm" className="h-fit">
-                        <TagLabel>Sudah Mengumpulkan</TagLabel>
-                      </Tag>
-                    )}
-                  </div>
-                </div>
-                <div className="justify-between lg:flex">
-                  <div className="flex gap-3">
-                    <div className="flex items-center gap-3 mt-2 text-gray-500">
-                      <FiCalendar />
-                      <span>Start: {format(new Date(task.startDate), 'MMMM d, yyyy')}</span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-2 text-gray-500">
-                      <FiBook />
-                      <span>{task.jenisTugas}</span>
                     </div>
                   </div>
-                  <div className="flex items-center mt-1 font-semibold text-Gray-600">
-                    <h1>
-                      <span className="text-Gray-900">Deadline :</span> {format(new Date(task.endDate), 'MMMM d, yyyy')}
-                    </h1>
+                  <div className="justify-between lg:flex">
+                    <div className="flex gap-3">
+                      <div className="flex items-center gap-3 mt-2 text-gray-500">
+                        <FiCalendar />
+                        <span>Start: {format(new Date(task.created_at), 'MMMM d, yyyy')}</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-gray-500">
+                        <FiBook />
+                        <span>{task.subject}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center mt-1 font-semibold text-Gray-600">
+                      <h1>
+                        <span className="text-Gray-900">Deadline :</span> {format(new Date(task.deadline), 'MMMM d, yyyy')}
+                      </h1>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="text-center py-5 text-Gray-600">Tidak ada tugas yang tersedia.</div>
+            )}
           </div>
         </div>
       </AuthenticatedLayout>

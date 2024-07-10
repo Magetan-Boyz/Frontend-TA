@@ -9,6 +9,7 @@ import { LuBookOpen } from 'react-icons/lu';
 import { LuUserSquare2 } from 'react-icons/lu';
 import { GoDotFill } from 'react-icons/go';
 import { GrTrophy } from 'react-icons/gr';
+import { IoReorderThreeOutline } from 'react-icons/io5';
 
 export const SidebarData = [
   {
@@ -29,8 +30,13 @@ export const SidebarData = [
         icon: <GoDotFill />
       },
       {
-        title: 'Agenda Hari Ini',
+        title: 'Jadwal Hari Ini',
         path: '/guru/kehadiran/agenda',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Agenda Hari Ini',
+        path: '/guru/kehadiran/agendaGlobal',
         icon: <GoDotFill />
       }
     ]
@@ -93,20 +99,20 @@ export const SidebarData = [
     ]
   },
   {
-    title: 'Ujian',
-    path: '/messages',
+    title: 'Kuis',
+    path: '/guru/kuis/list',
     icon: <LuBookOpen />,
     iconClosed: <RiArrowDownSLine />,
     iconOpened: <RiArrowUpSLine />,
     subNav: [
       {
-        title: 'Preview Tugas',
-        path: '/guru/tugas/previewtugas',
+        title: 'List Kuis',
+        path: '/guru/kuis/list',
         icon: <GoDotFill />
       },
       {
-        title: 'Status Pengumpulan',
-        path: '/guru/tugas/status',
+        title: 'Hasil Kuis',
+        path: '/guru/kuis/hasil',
         icon: <GoDotFill />
       }
     ]
@@ -120,7 +126,7 @@ export const SidebarData = [
     subNav: [
       {
         title: 'List Pelaporan Prestasi',
-        path: '/siswa/prestasi/list',
+        path: '/guru/prestasi/list',
         icon: <GoDotFill />
       }
     ]
@@ -138,11 +144,6 @@ export const SidebarData = [
         icon: <GoDotFill />
       },
       {
-        title: 'Konseling',
-        path: '/guru/pengaturan/konseling',
-        icon: <GoDotFill />
-      },
-      {
         title: 'Dispensasi',
         path: '/guru/pengaturan/dispensasi',
         icon: <GoDotFill />
@@ -151,12 +152,12 @@ export const SidebarData = [
         title: 'Logbook Pelanggaran',
         path: '/guru/pengaturan/logbookpelanggaran',
         icon: <GoDotFill />
-      },
-      {
-        title: 'Pengaduan',
-        path: '/guru/pengaturan/pengaduan',
-        icon: <GoDotFill />
       }
     ]
+  },
+  {
+    title: 'Information Center',
+    path: '/guru/pengaturan/pengaduan',
+    icon: <IoReorderThreeOutline />
   }
 ];

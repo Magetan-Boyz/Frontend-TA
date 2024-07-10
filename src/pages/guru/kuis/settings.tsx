@@ -26,10 +26,6 @@ export default function settings() {
               </PrimaryButton>
             </div>
           </div>
-          <div className="flex gap-3 p-5">
-            <Checkbox />
-            <label htmlFor="active">Kuis ini telah aktif</label>
-          </div>
           <div className="flex flex-col gap-5 p-5">
             <label htmlFor="judul">Judul</label>
             <TextInput placeholder="Judul Kuis" />

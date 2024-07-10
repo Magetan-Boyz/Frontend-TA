@@ -1,53 +1,14 @@
 import * as React from 'react';
-import axios from 'axios';
+import { useRouter } from 'next/router';
 import { Box, Avatar, Flex, FormControl, FormLabel, Input, Select, Text, HStack } from '@chakra-ui/react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import PrimaryButton from '@/components/PrimaryButton';
 
-// Define the type for a province item
-interface Province {
-  id: string;
-  name: string;
-}
-
 export default function DetailDataDiri() {
-  const [provinsi, setProvinsi] = React.useState<Province[]>([]);
-  const [kabupaten, setKabupaten] = React.useState<Province[]>([]);
-  const [selectedProvinsi, setSelectedProvinsi] = React.useState<string>('');
-  const [selectedKabupaten, setSelectedKabupaten] = React.useState<string>('');
-
-  const handleProvinsiChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProvinsi(event.target.value);
-  };
-
-  const handleKabupatenChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedKabupaten(event.target.value);
-  };
-
-  React.useEffect(() => {
-    axios
-      .get<Province[]>('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
-      .then((response) => {
-        setProvinsi(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching provinces:', error);
-      });
-  }, []);
-
-  React.useEffect(() => {
-    if (selectedProvinsi) {
-      axios
-        .get<Province[]>(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvinsi}.json`)
-        .then((response) => {
-          setKabupaten(response.data);
-        })
-        .catch((error) => {
-          console.error('Error fetching regencies:', error);
-        });
-    }
-  }, [selectedProvinsi]);
+  const router = useRouter();
+  const { student } = router.query;
+  const studentData = JSON.parse(student as string);
 
   return (
     <AuthenticatedLayout>
@@ -59,14 +20,13 @@ export default function DetailDataDiri() {
           </Text>
         </Flex>
         <Flex align="center" gap={5} p={7}>
-          <Avatar size="2xl" name="Segun Adebayo" src="https://bit.ly/sage-adebayo" showBorder={true} shadow="lg" />
+          <Avatar size="2xl" name={studentData?.name} src="https://bit.ly/sage-adebayo" showBorder={true} shadow="lg" />
           <Box>
             <Text fontSize="3xl" fontWeight="semibold">
-              John Doe
+              {studentData?.name}
             </Text>
-            <Text color="Gray-600">NISN : 1234567890</Text>
-            <Text color="Gray-600">Jenis Kelamin : Perempuan</Text>
-            <Text color="Gray-600">Kelas : X</Text>
+            <Text color="Gray-600">NISN : {studentData?.nisn}</Text>
+            <Text color="Gray-600">Jenis Kelamin : {studentData?.gender}</Text>
           </Box>
         </Flex>
         <Box p={3}>
@@ -77,39 +37,27 @@ export default function DetailDataDiri() {
           </Box>
           <FormControl mt={4}>
             <FormLabel>Tempat Lahir</FormLabel>
-            <Input placeholder="Magetan" />
+            <Input placeholder="Magetan" defaultValue={studentData?.birthplace} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Tanggal Lahir</FormLabel>
-            <Input placeholder="06 Juni 2008" />
+            <Input placeholder="06 Juni 2008" defaultValue={studentData?.birthdate} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Alamat</FormLabel>
-            <Input placeholder="Jln H.A Salim No 255 Desa Pelem" />
+            <Input placeholder="Jln H.A Salim No 255 Desa Pelem" defaultValue={studentData?.address} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Provinsi Asal</FormLabel>
-            <Select placeholder="Pilih Provinsi" value={selectedProvinsi} onChange={handleProvinsiChange}>
-              {provinsi.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </Select>
+            <Input placeholder="06 Juni 2008" defaultValue={studentData?.province} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Kabupaten Asal</FormLabel>
-            <Select placeholder="Pilih Kabupaten" value={selectedKabupaten} onChange={handleKabupatenChange}>
-              {kabupaten.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </Select>
+            <Input placeholder="06 Juni 2008" defaultValue={studentData?.city} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Golongan Darah</FormLabel>
-            <Select placeholder="Pilih Golongan Darah">
+            <Select placeholder="Pilih Golongan Darah" defaultValue={studentData?.blood_type}>
               <option value="A">A</option>
               <option value="B">B</option>
               <option value="AB">AB</option>
@@ -118,7 +66,7 @@ export default function DetailDataDiri() {
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Agama</FormLabel>
-            <Select placeholder="Pilih Agama">
+            <Select placeholder="Pilih Agama" defaultValue={studentData?.religion}>
               <option value="Islam">Islam</option>
               <option value="Katolik">Katolik</option>
               <option value="Protestan">Protestan</option>
@@ -133,30 +81,34 @@ export default function DetailDataDiri() {
             </Text>
           </Box>
           <FormControl mt={4}>
-            <HStack spacing={4} className="items-center">
+            <HStack spacing={4}>
               <Box flex="1">
                 <FormLabel>No Handphone</FormLabel>
-                <Input placeholder="089503889774" />
+                <Input placeholder="089503889774" defaultValue={studentData?.phone} />
               </Box>
-              <PrimaryButton btnClassName="w-fit h-fit">Hubungi WA</PrimaryButton>
+              <PrimaryButton size="mini" onClick={() => router.replace(`https://wa.me/${studentData?.phone}`)} btnClassName="w-fit h-fit">
+                Hubungi WA
+              </PrimaryButton>
             </HStack>
           </FormControl>
           <FormControl mt={4}>
             <HStack spacing={4}>
               <Box flex="1">
                 <FormLabel>No. Handphone Orang Tua</FormLabel>
-                <Input placeholder="089503889774" />
+                <Input placeholder="089503889774" defaultValue={studentData?.parent_phone} />
               </Box>
-              <PrimaryButton btnClassName="w-fit h-fit">Hubungi WA</PrimaryButton>
+              <PrimaryButton size="mini" onClick={() => router.replace(`https://wa.me/${studentData?.phone}`)} btnClassName="w-fit h-fit">
+                Hubungi WA
+              </PrimaryButton>
             </HStack>
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Email</FormLabel>
-            <Input placeholder="dominica@gmail.com" />
+            <Input placeholder="dominica@gmail.com" defaultValue={studentData?.email} />
           </FormControl>
           <FormControl mt={4}>
             <FormLabel>Email Institusi</FormLabel>
-            <Input placeholder="dominica@student.snesma.ac.id" />
+            <Input placeholder="dominica@student.snesma.ac.id" defaultValue={studentData?.institutional_email} />
           </FormControl>
         </Box>
       </Box>

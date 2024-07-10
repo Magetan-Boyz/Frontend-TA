@@ -1,17 +1,18 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import { DayPicker, DayMouseEventHandler } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import { isSameDay } from 'date-fns';
 import PrimaryButton from '@/components/PrimaryButton';
-import { Select } from '@chakra-ui/react';
+import { Select, useToast } from '@chakra-ui/react';
 import { FiSearch, FiCalendar, FiBook, FiInfo } from 'react-icons/fi';
-import { format } from 'date-fns';
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 import { PiFlagBannerBold } from 'react-icons/pi';
 import SecondaryButton from '@/components/SecondaryButton';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import { format } from 'date-fns';
 
 export default function PreviewTugas() {
   const initiallySelectedDate = new Date();
@@ -20,6 +21,20 @@ export default function PreviewTugas() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const calendarContainerRef = React.useRef<HTMLDivElement>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+
+  const [classSubjectData, setClassSubjectData] = React.useState([]);
+  const [formData, setFormData] = React.useState({
+    class_id: '',
+    subject_id: '',
+    title: '',
+    type_of_task: '',
+    description: '',
+    deadline: '',
+    link: ''
+  });
+
+  const [tasks, setTasks] = React.useState([]);
 
   React.useEffect(() => {
     const hd = new Holidays('ID');
@@ -27,6 +42,42 @@ export default function PreviewTugas() {
     const holidays = hd.getHolidays(currentYear);
     const holidayDates = holidays.map((holiday) => new Date(holiday.date));
     setDisabledDays(holidayDates);
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          setClassSubjectData(response.data.data);
+        } else {
+          setClassSubjectData([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching classes and subjects:', error);
+        setClassSubjectData([]);
+      });
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/task/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          setTasks(response.data.data);
+        } else {
+          setTasks([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching tasks:', error);
+        setTasks([]);
+      });
   }, []);
 
   const handleDayClick: DayMouseEventHandler = (day) => {
@@ -41,31 +92,58 @@ export default function PreviewTugas() {
     setSearchTerm(event.target.value);
   };
 
-  const tugas = [
-    {
-      id: 1,
-      nama: 'Buatlah Artikel mengenai Lingkungan disekitarmu',
-      startDate: '2022-10-06',
-      endDate: '2022-10-20',
-      jenisTugas: 'Essay'
-    },
-    {
-      id: 2,
-      nama: 'Tugas Matematika',
-      startDate: '2022-11-01',
-      endDate: '2022-11-15',
-      jenisTugas: 'Latihan'
-    },
-    {
-      id: 3,
-      nama: 'Prakarya: Buat Kerajinan Tangan',
-      startDate: '2022-09-01',
-      endDate: '2022-09-10',
-      jenisTugas: 'Proyek'
-    }
-  ];
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value
+    }));
+  };
 
-  const filteredTugas = tugas.filter((task) => task.nama.toLowerCase().includes(searchTerm.toLowerCase()));
+  const handleSubmit = () => {
+    const token = localStorage.getItem('token');
+    const formattedDeadline = formData.deadline ? dayjs(formData.deadline).hour(23).minute(59).second(0).format('YYYY-MM-DD HH:mm:ss') : '';
+
+    const updatedFormData = { ...formData, deadline: formattedDeadline };
+
+    axios
+      .post('https://ems-30c1804a223a.herokuapp.com/api/teacher/task/create', updatedFormData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then((response) => {
+        toast({
+          title: 'Success',
+          description: 'Task created successfully',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        onClose();
+        setFormData({
+          class_id: '',
+          subject_id: '',
+          title: '',
+          type_of_task: '',
+          description: '',
+          deadline: '',
+          link: ''
+        });
+      })
+      .catch((error) => {
+        console.error('Error creating task:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to create task',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
+  };
+
+  const filteredTasks = tasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div>
@@ -128,29 +206,30 @@ export default function PreviewTugas() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 mt-4">
-            {filteredTugas.map((task) => (
+            {filteredTasks.map((task) => (
               <div key={task.id} className="p-4 border rounded-md shadow-sm">
                 <h2 className="font-semibold text-[#6941C6]">Tugas</h2>
-                <h3 className="mt-2 text-lg font-bold">{task.nama}</h3>
+                <h3 className="mt-2 text-lg font-bold">{task.title}</h3>
                 <div className="justify-between lg:flex">
                   <div className="flex gap-3">
                     <div className="flex items-center gap-3 mt-2 text-gray-500">
                       <FiCalendar />
-                      <span>Start: {format(new Date(task.startDate), 'MMMM d, yyyy')}</span>
+                      <span>Start: {format(new Date(task.created_at), 'MMMM d, yyyy')}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-2 text-gray-500">
                       <FiBook />
-                      <span>{task.jenisTugas}</span>
+                      <span>{task.type_of_task}</span>
                     </div>
                   </div>
                   <div className="flex items-center mt-1 font-semibold text-Gray-600">
                     <h1>
-                      <span className="text-Gray-900">Deadline :</span> {format(new Date(task.endDate), 'MMMM d, yyyy')}
+                      <span className="text-Gray-900">Deadline :</span> {format(new Date(task.deadline), 'MMMM d, yyyy')}
                     </h1>
                   </div>
                 </div>
               </div>
             ))}
+            {filteredTasks.length === 0 && <div className="text-center py-5 text-Gray-600">Tidak ada tugas ditemukan</div>}
           </div>
         </div>
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -165,26 +244,88 @@ export default function PreviewTugas() {
             <ModalBody>
               <h1 className="text-lg font-semibold">Tugas</h1>
               <p className="text-sm font-light text-Gray-600">Isi kolom berikut untuk menambah atau mengedit tugas</p>
-              <form action="" className="mt-3">
-                <label htmlFor="judul" className="text-sm text-Gray-600">
+              <form className="mt-3">
+                <label htmlFor="class_id" className="text-sm text-Gray-600">
+                  Kelas
+                </label>
+                <Select
+                  id="class_id"
+                  name="class_id"
+                  placeholder="Pilih Kelas"
+                  size="md"
+                  value={formData.class_id}
+                  onChange={handleInputChange}
+                >
+                  {classSubjectData.map((cls) => (
+                    <option key={cls.class_id} value={cls.class_id}>
+                      {cls.class_name}
+                    </option>
+                  ))}
+                </Select>
+                <label htmlFor="subject_id" className="mt-2 text-sm text-Gray-600">
+                  Mata Pelajaran
+                </label>
+                <Select
+                  id="subject_id"
+                  name="subject_id"
+                  placeholder="Pilih Mata Pelajaran"
+                  size="md"
+                  value={formData.subject_id}
+                  onChange={handleInputChange}
+                >
+                  {classSubjectData.map((subject) => (
+                    <option key={subject.subject_id} value={subject.subject_id}>
+                      {subject.subject_name}
+                    </option>
+                  ))}
+                </Select>
+                <label htmlFor="title" className="mt-2 text-sm text-Gray-600">
                   Judul
                 </label>
-                <input type="text" id="judul" className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300" />
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300"
+                />
                 <div className="flex flex-col mt-2 mb-2">
-                  <label htmlFor="jenis" className="text-sm text-Gray-600">
+                  <label htmlFor="type_of_task" className="text-sm text-Gray-600">
                     Jenis Tugas
                   </label>
-                  <select name="jenis" id="jenis" className="p-2 mt-2 border-2 rounded-md border-Gray-300">
-                    <option value="1">Tugas Harian</option>
-                    <option value="2">Tugas</option>
+                  <select
+                    name="type_of_task"
+                    id="type_of_task"
+                    value={formData.type_of_task}
+                    onChange={handleInputChange}
+                    className="p-2 mt-2 border-2 rounded-md border-Gray-300"
+                  >
+                    <option value="Tugas Harian">Tugas Harian</option>
+                    <option value="Ulangan Harian">Ulangan Harian</option>
+                    <option value="Proyek">Proyek</option>
                   </select>
                 </div>
-                <label htmlFor="deskripsi" className="text-sm text-Gray-600">
+                <label htmlFor="description" className="text-sm text-Gray-600">
                   Deskripsi
                 </label>
                 <textarea
-                  id="deskripsi"
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
                   placeholder="cth. Buat artikel mengenai keluarga dalam bahasa inggris..."
+                  className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300"
+                />
+                <label htmlFor="deadline" className="text-sm text-Gray-600">
+                  Deadline
+                </label>
+                <input
+                  type="date"
+                  id="deadline"
+                  name="deadline"
+                  value={formData.deadline}
+                  onChange={handleInputChange}
                   className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-300"
                 />
                 <label htmlFor="link" className="text-sm text-Gray-600">
@@ -195,6 +336,9 @@ export default function PreviewTugas() {
                   <input
                     type="text"
                     id="link"
+                    name="link"
+                    value={formData.link}
+                    onChange={handleInputChange}
                     className="w-full p-2 border-0 rounded-r-md focus:outline-none"
                     placeholder="www.example.com"
                   />
@@ -209,7 +353,7 @@ export default function PreviewTugas() {
               <SecondaryButton onClick={onClose} btnClassName="font-semibold">
                 Batal
               </SecondaryButton>
-              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
+              <PrimaryButton onClick={handleSubmit} btnClassName="font-semibold">
                 Konfirmasi
               </PrimaryButton>
             </ModalFooter>

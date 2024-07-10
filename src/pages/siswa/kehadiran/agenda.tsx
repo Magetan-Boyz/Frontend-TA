@@ -10,7 +10,7 @@ export default function Agenda() {
     <div>
       <AuthenticatedLayout>
         <Seo templateTitle="Home" />
-        <div className="w-full h-full p-3 rounded-md shadow-lg bg-Base-white">
+        <div className="w-full h-full p-3 overflow-y-auto rounded-md shadow-lg bg-Base-white">
           <AgendaCalendarSiswa />
         </div>
       </AuthenticatedLayout>

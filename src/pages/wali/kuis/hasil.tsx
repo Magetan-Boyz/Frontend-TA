@@ -3,44 +3,43 @@ import AuthenticatedLayout from '@/components/layout/layoutWali/AuthenticatedLay
 import * as React from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Select } from '@chakra-ui/react';
+import axios from 'axios';
+import { useToast } from '@chakra-ui/react';
 
-export default function hasil() {
+export default function Hasil() {
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [hasil, setHasil] = React.useState([]);
+  const toast = useToast();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const [hasil] = React.useState([
-    {
-      id: 1,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 1',
-      deskripsi: 'Kuis 1 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    },
-    {
-      id: 2,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 2',
-      deskripsi: 'Kuis 2 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    },
-    {
-      id: 3,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 3',
-      deskripsi: 'Kuis 3 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    }
-  ]);
+  console.log(hasil);
 
-  const handlePercentage = (totalpoint: string) => {
-    return (parseInt(totalpoint) / 100) * 100;
-  };
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/parent/quiz`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          setHasil(response.data.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching quiz results:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch quiz results',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
+  }, [toast]);
 
   return (
     <div>
@@ -83,17 +82,20 @@ export default function hasil() {
               <Tbody>
                 {hasil.map((item, index) => (
                   <Tr key={index}>
-                    <Td>{item.tanggal}</Td>
+                    <Td>{new Date(item.submit_at).toLocaleDateString()}</Td>
                     <Td className="flex flex-col">
-                      <span>{item.jenis}</span>
-                      <span>{item.deskripsi}</span>
+                      <span>{item.quiz_name}</span>
                     </Td>
-                    <Td>{handlePercentage(item.totalpoint)}%</Td>
-                    <Td>{item.totalpoint}/100</Td>
+                    <Td>{(item.grade / 100) * 100}%</Td>
+                    <Td>{item.grade}/100</Td>
                     <Td>
-                      {item.status === 'Lulus' ? (
+                      {item.status === 'submitted' ? (
                         <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Passed</TagLabel>
+                          <TagLabel>Submitted</TagLabel>
+                        </Tag>
+                      ) : item.status === 'waiting for graded' ? (
+                        <Tag colorScheme="orange" borderRadius="full" size="sm">
+                          <TagLabel>Waiting For Graded</TagLabel>
                         </Tag>
                       ) : (
                         <Tag colorScheme="red" borderRadius="full" size="sm">

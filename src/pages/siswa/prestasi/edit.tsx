@@ -5,14 +5,11 @@ import { Select, Tag, TagLabel } from '@chakra-ui/react';
 import PrimaryButton from '@/components/PrimaryButton';
 
 export default function EditPrestasi() {
-  const item = {
-    id: 1,
-    nama: 'Lomba Menulis Cerpen Kreatif',
-    jenisPrestasi: 'OSN',
-    partisipasi: 'Peserta',
-    tingkat: 'Kabupaten',
-    status: 'Wait Approval'
-  };
+  const [item, setItem] = React.useState([]);
+
+  // React.useEffect(() => {
+  //   axios
+  //     .get('https://ems-30c1804a223a.herokuapp.com/api/student/achivement/1', {
   return (
     <div>
       <AuthenticatedLayout>

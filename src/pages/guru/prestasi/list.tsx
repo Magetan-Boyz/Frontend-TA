@@ -1,10 +1,11 @@
 import * as React from 'react';
-import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
+import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 // import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import Image from 'next/image';
+import axios from 'axios';
 
-import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel } from '@chakra-ui/react';
+import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Box, Text } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
 import { Button } from '@chakra-ui/react';
@@ -12,42 +13,29 @@ import { FiSearch } from 'react-icons/fi';
 
 export default function PrestasiList() {
   const router = useRouter();
-  const [prestasi] = React.useState([
-    {
-      id: 1,
-      nis: '1234567890',
-      namaSiswa: 'Dominica',
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Peserta',
-      tingkat: 'Kabupaten',
-      status: 'Success'
-    },
-    {
-      id: 2,
-      nis: '1234567890',
-      namaSiswa: 'Dominica',
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Juara 1',
-      tingkat: 'Nasional',
-      status: 'success'
-    },
-    {
-      id: 3,
-      nis: '1234567890',
-      namaSiswa: 'Dominica',
-      nama: 'Lomba Menulis Cerpen Kreatif',
-      jenisPrestasi: 'OSN',
-      partisipasi: 'Juara 2',
-      tingkat: 'Kota',
-      status: 'success'
-    }
-    // Add more items as needed
-  ]);
+  const [prestasi, setPrestasi] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/achivement/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        setPrestasi(response.data.data || []); // Ensure prestasi is an array
+        setLoading(false); // Set loading to false after data is fetched
+      })
+      .catch((error) => {
+        console.error('Error fetching achievements:', error);
+        setPrestasi([]); // Ensure prestasi is an array in case of error
+        setLoading(false); // Set loading to false even if there's an error
+      });
+  }, []);
 
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 10;
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -89,88 +77,89 @@ export default function PrestasiList() {
             </div>
           </div>
           <TableContainer className="m-3 border rounded-lg shadow-sm ">
-            <Table variant="simple" className="">
-              <Thead className="bg-Gray-50">
-                <Tr>
-                  <Th>NIS</Th>
-                  <Th>Nama Siswa</Th>
-                  <Th>Jenis Prestasi</Th>
-                  <Th>Nama dan Judul Kegiatan</Th>
-                  <Th>Partisipasi</Th>
-                  <Th>Tingkat</Th>
-                  <Th>Status</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {currentData.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>{item.nis}</Td>
-                    <Td className="flex items-center gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.namaSiswa}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="">
-                        <span className="text-sm font-medium text-Gray-900">{item.namaSiswa}</span>
-                      </div>
-                    </Td>
-                    <Td>{item.jenisPrestasi}</Td>
-                    <Td>{item.nama}</Td>
-                    <Td>{item.partisipasi}</Td>
-                    <Td>{item.tingkat}</Td>
-                    <Td>
-                      {item.status === 'Wait Approval' ? (
-                        <Tag colorScheme="blue" borderRadius="full" size="sm">
-                          <TagLabel>Wait Approval</TagLabel>
-                        </Tag>
-                      ) : item.status === 'Success' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Success</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Declined</TagLabel>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      <Button
-                        colorScheme="gray"
-                        variant="outline"
-                        size="md"
-                        onClick={() => router.push(`/siswa/prestasi/detail/${item.id}`)}
-                      >
-                        Details
-                      </Button>
-                    </Td>
+            {loading ? (
+              <Box className="flex justify-center items-center py-10">
+                <Text>Loading...</Text>
+              </Box>
+            ) : prestasi.length === 0 ? (
+              <Box className="flex justify-center items-center py-10">
+                <Text>No achievements found</Text>
+              </Box>
+            ) : (
+              <Table variant="simple" className="">
+                <Thead className="bg-Gray-50">
+                  <Tr>
+                    <Th>No</Th>
+                    <Th>Nama Siswa</Th>
+                    <Th>Jenis Prestasi</Th>
+                    <Th>Nama dan Judul Kegiatan</Th>
+                    <Th>Partisipasi</Th>
+                    <Th>Tingkat</Th>
+                    <Th>Status</Th>
+                    <Th></Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {currentData.map((item, index) => (
+                    <Tr key={index}>
+                      <Td>{index + 1}</Td>
+                      <Td>{item.student_name}</Td>
+                      <Td>{item.type_of_achivement}</Td>
+                      <Td>{item.title}</Td>
+                      <Td>{item.participation}</Td>
+                      <Td>{item.level}</Td>
+                      <Td>
+                        {item.status === 'pending' ? (
+                          <Tag colorScheme="blue" borderRadius="full" size="sm">
+                            <TagLabel>Wait Approval</TagLabel>
+                          </Tag>
+                        ) : item.status === 'accepted' ? (
+                          <Tag colorScheme="green" borderRadius="full" size="sm">
+                            <TagLabel>Success</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Tag colorScheme="red" borderRadius="full" size="sm">
+                            <TagLabel>Declined</TagLabel>
+                          </Tag>
+                        )}
+                      </Td>
+                      <Td>
+                        <Button
+                          colorScheme="gray"
+                          variant="outline"
+                          size="md"
+                          onClick={() => router.push(`/guru/prestasi/detail/${item.id}`)}
+                        >
+                          Details
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            )}
           </TableContainer>
-          <div id="pagination" className="flex justify-between p-3 border-t border-Gray-200">
-            <SecondaryButton
-              btnClassName={`font-semibold w-fit ${currentPage === 1 ? 'text-Gray-300 border-Gray-300' : ''}`}
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </SecondaryButton>
-            <span className="self-center">
-              Page {currentPage} of {Math.ceil(prestasi.length / itemsPerPage)}
-            </span>
-            <SecondaryButton
-              btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(prestasi.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
-              onClick={handleNextPage}
-              disabled={currentPage === Math.ceil(prestasi.length / itemsPerPage)}
-            >
-              Next
-            </SecondaryButton>
-          </div>
+          {prestasi.length > 0 && (
+            <div id="pagination" className="flex justify-between p-3 border-t border-Gray-200">
+              <SecondaryButton
+                btnClassName={`font-semibold w-fit ${currentPage === 1 ? 'text-Gray-300 border-Gray-300' : ''}`}
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </SecondaryButton>
+              <span className="self-center">
+                Page {currentPage} of {Math.ceil(prestasi.length / itemsPerPage)}
+              </span>
+              <SecondaryButton
+                btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(prestasi.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
+                onClick={handleNextPage}
+                disabled={currentPage === Math.ceil(prestasi.length / itemsPerPage)}
+              >
+                Next
+              </SecondaryButton>
+            </div>
+          )}
         </div>
       </AuthenticatedLayout>
     </div>

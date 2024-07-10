@@ -7,7 +7,7 @@ import { LuUserSquare2 } from 'react-icons/lu';
 import { GoDotFill } from 'react-icons/go';
 import { BsPeople } from 'react-icons/bs';
 import { TbUserShare } from 'react-icons/tb';
-import { LiaUserEditSolid } from 'react-icons/lia';
+import { IoReorderThreeOutline } from 'react-icons/io5';
 
 export const SidebarData = [
   {
@@ -25,6 +25,11 @@ export const SidebarData = [
       {
         title: 'Buat Mata Pelajaran',
         path: '/admin/mata-pelajaran/list',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Assign Guru Pengajar',
+        path: '/admin/mata-pelajaran/assign',
         icon: <GoDotFill />
       },
       {
@@ -59,6 +64,11 @@ export const SidebarData = [
         title: 'List Kelas',
         path: '/admin/kelas/list',
         icon: <GoDotFill />
+      },
+      {
+        title: 'Assign Mata Pelajaran',
+        path: '/admin/kelas/assign',
+        icon: <GoDotFill />
       }
     ]
   },
@@ -73,24 +83,29 @@ export const SidebarData = [
         title: 'List Akun Siswa',
         path: '/admin/siswa/list',
         icon: <GoDotFill />
+      },
+      {
+        title: 'Assign ke Kelas',
+        path: '/admin/siswa/assign',
+        icon: <GoDotFill />
       }
     ]
   },
   {
-    title: 'Jadwal Pelajaran',
+    title: 'Jadwal & Agenda',
     path: '/jadwal',
     icon: <FiCalendar />,
     iconClosed: <RiArrowDownSLine />,
     iconOpened: <RiArrowUpSLine />,
     subNav: [
       {
-        title: 'Assign Mata Pelajaran',
-        path: '/admin/jadwal/assign',
+        title: 'Buat Jadwal',
+        path: '/admin/jadwal/create',
         icon: <GoDotFill />
       },
       {
-        title: 'Buat Jadwal',
-        path: '/admin/jadwal/create',
+        title: 'Buat Agenda',
+        path: '/admin/agenda/create',
         icon: <GoDotFill />
       }
     ]
@@ -106,21 +121,17 @@ export const SidebarData = [
         title: 'Buat Akun',
         path: '/admin/wali/create',
         icon: <GoDotFill />
+      },
+      {
+        title: 'Assign ke Siswa',
+        path: '/admin/wali/assign',
+        icon: <GoDotFill />
       }
     ]
   },
   {
-    title: 'Pengaduan',
-    path: '/pengaduan',
-    icon: <LiaUserEditSolid />,
-    iconClosed: <RiArrowDownSLine />,
-    iconOpened: <RiArrowUpSLine />,
-    subNav: [
-      {
-        title: 'List Pengaduan',
-        path: '/admin/pengaduan/list',
-        icon: <GoDotFill />
-      }
-    ]
+    title: 'Information Center',
+    path: '/admin/pengaduan/list',
+    icon: <IoReorderThreeOutline />
   }
 ];

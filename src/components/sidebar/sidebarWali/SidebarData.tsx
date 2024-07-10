@@ -9,6 +9,7 @@ import { LuBookOpen } from 'react-icons/lu';
 import { LuUserSquare2 } from 'react-icons/lu';
 import { GoDotFill } from 'react-icons/go';
 import { GrTrophy } from 'react-icons/gr';
+import { IoReorderThreeOutline } from 'react-icons/io5';
 
 export const SidebarData = [
   {
@@ -29,8 +30,13 @@ export const SidebarData = [
         icon: <GoDotFill />
       },
       {
-        title: 'Agenda Hari Ini',
+        title: 'Jadwal Hari Ini',
         path: '/wali/kehadiran/agenda',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Agenda',
+        path: '/wali/kehadiran/agendaGlobal',
         icon: <GoDotFill />
       }
     ]
@@ -117,12 +123,12 @@ export const SidebarData = [
         title: 'Logbook Pelanggaran',
         path: '/wali/profil/logbookpelanggaran',
         icon: <GoDotFill />
-      },
-      {
-        title: 'Pengaduan',
-        path: '/wali/profil/pengaduan',
-        icon: <GoDotFill />
       }
     ]
+  },
+  {
+    title: 'Information Center',
+    path: '/wali/profil/pengaduan',
+    icon: <IoReorderThreeOutline />
   }
 ];

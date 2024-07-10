@@ -9,6 +9,7 @@ import { LuBookOpen } from 'react-icons/lu';
 import { LuUserSquare2 } from 'react-icons/lu';
 import { GoDotFill } from 'react-icons/go';
 import { GrTrophy } from 'react-icons/gr';
+import { IoReorderThreeOutline } from 'react-icons/io5';
 
 export const SidebarData = [
   {
@@ -29,8 +30,13 @@ export const SidebarData = [
         icon: <GoDotFill />
       },
       {
-        title: 'Agenda Hari Ini',
+        title: 'Jadwal Pelajaran',
         path: '/siswa/kehadiran/agenda',
+        icon: <GoDotFill />
+      },
+      {
+        title: 'Agenda',
+        path: '/siswa/kehadiran/agendaGlobal',
         icon: <GoDotFill />
       }
     ]
@@ -133,11 +139,6 @@ export const SidebarData = [
         icon: <GoDotFill />
       },
       {
-        title: 'Konseling',
-        path: '/siswa/profil/konseling',
-        icon: <GoDotFill />
-      },
-      {
         title: 'Dispensasi',
         path: '/siswa/profil/dispensasi',
         icon: <GoDotFill />
@@ -146,12 +147,12 @@ export const SidebarData = [
         title: 'Logbook Pelanggaran',
         path: '/siswa/profil/logbookpelanggaran',
         icon: <GoDotFill />
-      },
-      {
-        title: 'Pengaduan',
-        path: '/siswa/profil/pengaduan',
-        icon: <GoDotFill />
       }
     ]
+  },
+  {
+    title: 'Information Center',
+    path: '/siswa/profil/pengaduan',
+    icon: <IoReorderThreeOutline />
   }
 ];

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutAdmin/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   Tr,
   Th,
   Td,
+  Tag,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,46 +17,101 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  useDisclosure
+  useDisclosure,
+  Skeleton,
+  useToast
 } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
-import { useRouter } from 'next/router';
 import { FiSearch } from 'react-icons/fi';
 import Image from 'next/image';
 import PrimaryButton from '@/components/PrimaryButton';
 import { LuBookOpen } from 'react-icons/lu';
+import axios from 'axios';
 
 export default function ListGuru() {
-  const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [tugas] = React.useState([
-    {
-      id: 1,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika',
-      email: 'monica@email.com',
-      password: '123456'
-    },
-    {
-      id: 3,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika',
-      email: 'monica@email.com',
-      password: '123456'
-    },
-    {
-      id: 3,
-      namaguru: 'Monica',
-      namaMapel: 'Matematika',
-      email: 'monica@email.com',
-      password: '123456'
-    }
-  ]);
-
+  const toast = useToast();
+  const [guru, setGuru] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [formData, setFormData] = React.useState({
+    username: '',
+    password: '',
+    name: '',
+    email: ''
+  });
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/admin/teacher/all`, {
+        headers: {
+          Authorization: `${token}`
+        }
+      })
+      .then((response) => {
+        setGuru(response.data.data || []);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching teachers:', error);
+        setGuru([]);
+        setLoading(false);
+      });
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value
+    }));
+  };
+
+  const handleCreateTeacher = (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    axios
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/admin/teacher/create`, formData, {
+        headers: {
+          Authorization: `${token}`
+        }
+      })
+      .then((response) => {
+        if (response.status === 201) {
+          setGuru((prevGuru) => [...prevGuru, response.data.data]);
+          toast({
+            title: 'Akun Guru Berhasil Dibuat',
+            description: 'Akun guru baru telah berhasil dibuat.',
+            status: 'success',
+            duration: 5000,
+            isClosable: true
+          });
+          onClose();
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Gagal membuat akun guru.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error creating teacher:', error);
+        toast({
+          title: 'Error',
+          description: 'Gagal membuat akun guru.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      });
   };
 
   return (
@@ -66,31 +121,13 @@ export default function ListGuru() {
         <div className="w-full p-3 border rounded-md shadow-lg h-fit border-Gray-200 bg-Base-white">
           <div className="flex items-center justify-between p-3 lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">List Guru Mata Pelajaran</h1>
-            <PrimaryButton btnClassName="w-fit h-fit" onClick={onOpen}>
-              Buat Akun
-            </PrimaryButton>
+            <div className="flex gap-3">
+              <PrimaryButton size="mini" btnClassName="w-fit h-fit" onClick={onOpen}>
+                Buat Akun
+              </PrimaryButton>
+            </div>
           </div>
           <div className="flex flex-col gap-4 py-6 lg:flex-row lg:justify-between lg:px-3">
-            <span className="flex flex-col w-full gap-4">
-              <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
-                Jenis Mata Pelajaran
-              </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </span>
-            <span className="flex flex-col w-full gap-4">
-              <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
-                Kelas
-              </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </span>
             <span className="flex flex-col justify-end w-full gap-4">
               <label htmlFor="sort" className="text-sm font-medium text-Gray-700"></label>
               <div className="relative">
@@ -107,44 +144,54 @@ export default function ListGuru() {
               </div>
             </span>
           </div>
-          <div className="m-3 border rounded-lg shadow-sm ">
-            <Table className="">
-              <Thead className="bg-Gray-50">
-                <Tr>
-                  <Th>Nama Guru</Th>
-                  <Th>Mata Pelajaran</Th>
-                  <Th>Email</Th>
-                  <Th>Password</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {tugas.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="flex items-center gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.namaguru}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="">
-                        <span className="text-sm font-medium text-Gray-900">{item.namaguru}</span>
-                      </div>
-                    </Td>
-                    <Td>{item.namaMapel}</Td>
-                    <Td>{item.email}</Td>
-                    <Td>{item.password}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold w-fit h-fit" onClick={() => router.push(`/materi/literasi/${item.id}`)}>
-                        Preview
-                      </SecondaryButton>
-                    </Td>
+          <div className="m-3 border rounded-lg shadow-sm">
+            {loading ? (
+              <>
+                <Skeleton height="40px" my="10px" />
+                <Skeleton height="40px" my="10px" />
+                <Skeleton height="40px" my="10px" />
+                <Skeleton height="40px" my="10px" />
+                <Skeleton height="40px" my="10px" />
+              </>
+            ) : (
+              <Table className="">
+                <Thead className="bg-Gray-50">
+                  <Tr>
+                    <Th>ID</Th>
+                    <Th>Nama Guru</Th>
+                    <Th>Email</Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {guru
+                    .filter((item) => item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((item, index) => (
+                      <Tr key={index}>
+                        <Td>
+                          <Tag colorScheme="blue" borderRadius="full" border={1} size="sm">
+                            {item.id.slice(0, 4)}
+                          </Tag>
+                        </Td>
+                        <Td className="">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={`https://ui-avatars.com/api/?name=${item.name}`}
+                              alt="Logo"
+                              width={40}
+                              height={24}
+                              className="rounded-full"
+                            />
+                            <div className="">
+                              <span className="text-sm font-medium text-Gray-900">{item.name}</span>
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>{item.email}</Td>
+                      </Tr>
+                    ))}
+                </Tbody>
+              </Table>
+            )}
           </div>
         </div>
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -159,39 +206,69 @@ export default function ListGuru() {
             <ModalBody>
               <h1 className="text-lg font-semibold">Buat Akun Guru</h1>
               <p className="text-sm font-light text-Gray-600">Buat Username dan Password</p>
-              <form action="" className="flex flex-col gap-3 pb-3 mt-3">
+              <form onSubmit={handleCreateTeacher} className="flex flex-col gap-3 pb-3 mt-3">
                 <div className="flex flex-col">
-                  <label htmlFor="email" className="text-sm text-Gray-600">
-                    Masukkan Email
+                  <label htmlFor="username" className="text-sm text-Gray-600">
+                    Username
                   </label>
-                  <input type="text" name="email" className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200" />
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200"
+                    required
+                  />
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor="password" className="text-sm text-Gray-600">
-                    Masukkan Password
+                    Password
                   </label>
-                  <input type="text" name="password" className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200" />
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200"
+                    required
+                  />
                 </div>
-                <div className="flex flex-col gap-3">
-                  <label htmlFor="judul" className="text-sm text-Gray-600">
-                    Assign Mata Pelajaran
+                <div className="flex flex-col">
+                  <label htmlFor="name" className="text-sm text-Gray-600">
+                    Nama
                   </label>
-                  <Select placeholder="Kelas" size="md" name="sort" className="">
-                    <option value="1">X</option>
-                    <option value="2">XI</option>
-                    <option value="3">XII</option>
-                  </Select>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200"
+                    required
+                  />
                 </div>
+                <div className="flex flex-col">
+                  <label htmlFor="email" className="text-sm text-Gray-600">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full p-2 mt-2 mb-2 border-2 rounded-md border-Gray-200"
+                    required
+                  />
+                </div>
+                <ModalFooter className="flex justify-center gap-3">
+                  <SecondaryButton onClick={onClose} btnClassName="font-semibold">
+                    Batal
+                  </SecondaryButton>
+                  <PrimaryButton type="submit" btnClassName="font-semibold">
+                    Konfirmasi
+                  </PrimaryButton>
+                </ModalFooter>
               </form>
             </ModalBody>
-            <ModalFooter className="flex justify-center gap-3">
-              <SecondaryButton onClick={onClose} btnClassName="font-semibold">
-                Batal
-              </SecondaryButton>
-              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
-                Konfirmasi
-              </PrimaryButton>
-            </ModalFooter>
           </ModalContent>
         </Modal>
       </AuthenticatedLayout>

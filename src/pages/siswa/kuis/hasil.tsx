@@ -2,44 +2,76 @@ import Seo from '@/components/Seo';
 import AuthenticatedLayout from '@/components/layout/layoutSiswa/AuthenticatedLayout';
 import * as React from 'react';
 import { FiSearch } from 'react-icons/fi';
-import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Select } from '@chakra-ui/react';
+import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Select, useToast } from '@chakra-ui/react';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
-export default function hasil() {
+export default function HasilKuis() {
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [subjects, setSubjects] = React.useState([]);
+  const [selectedSubject, setSelectedSubject] = React.useState('');
+  const [hasil, setHasil] = React.useState([]);
+  const toast = useToast();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    fetchSubjects();
+  }, []);
+
+  const fetchSubjects = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/class/subjects`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const uniqueSubjects = response.data.data.reduce((acc, current) => {
+        if (!acc.some((item) => item.subject_name === current.subject_name)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+      setSubjects(uniqueSubjects || []);
+    } catch (error) {
+      console.error('Error fetching subjects:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (selectedSubject) {
+      fetchQuizGrades(selectedSubject);
+    }
+  }, [selectedSubject]);
+
+  const fetchQuizGrades = async (subjectId) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/quiz/grades?subjectID=${subjectId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setHasil(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching quiz grades:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch quiz grades',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+    }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const [hasil] = React.useState([
-    {
-      id: 1,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 1',
-      deskripsi: 'Kuis 1 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    },
-    {
-      id: 2,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 2',
-      deskripsi: 'Kuis 2 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    },
-    {
-      id: 3,
-      tanggal: '12-12-2021',
-      jenis: 'Kuis 3',
-      deskripsi: 'Kuis 3 Matematika',
-      totalpoint: '80',
-      status: 'Lulus'
-    }
-  ]);
+  const filteredHasil = hasil.filter(
+    (item) =>
+      item.quiz_name.toLowerCase().includes(searchTerm.toLowerCase()) || item.student_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handlePercentage = (totalpoint: string) => {
-    return (parseInt(totalpoint) / 100) * 100;
+  const handlePercentage = (totalpoint: number) => {
+    return (totalpoint / 100) * 100;
   };
 
   return (
@@ -62,10 +94,12 @@ export default function hasil() {
                   <FiSearch />
                 </div>
               </div>
-              <Select placeholder="Kelas" size="md" className="w-fit">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+              <Select placeholder="Pilih Mata Pelajaran" size="md" onChange={(e) => setSelectedSubject(e.target.value)}>
+                {subjects.map((subject) => (
+                  <option key={subject.subject_id} value={subject.subject_id}>
+                    {subject.subject_name}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
@@ -74,35 +108,50 @@ export default function hasil() {
               <Thead className="bg-Gray-50">
                 <Tr>
                   <Th>Tanggal</Th>
-                  <Th>Jenis Kuis</Th>
+                  <Th>Nama Kuis</Th>
                   <Th>(%)</Th>
                   <Th>Total Points</Th>
                   <Th>Status</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {hasil.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>{item.tanggal}</Td>
-                    <Td className="flex flex-col">
-                      <span>{item.jenis}</span>
-                      <span>{item.deskripsi}</span>
-                    </Td>
-                    <Td>{handlePercentage(item.totalpoint)}%</Td>
-                    <Td>{item.totalpoint}/100</Td>
-                    <Td>
-                      {item.status === 'Lulus' ? (
-                        <Tag colorScheme="green" borderRadius="full" size="sm">
-                          <TagLabel>Passed</TagLabel>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red" borderRadius="full" size="sm">
-                          <TagLabel>Failed</TagLabel>
-                        </Tag>
-                      )}
+                {filteredHasil.length > 0 ? (
+                  filteredHasil.map((item, index) => (
+                    <Tr key={index}>
+                      <Td>{item.submit_at}</Td>
+                      <Td className="flex flex-col">
+                        <span>{item.quiz_name}</span>
+                      </Td>
+                      <Td>{handlePercentage(item.grade)}%</Td>
+                      <Td>{item.grade}/100</Td>
+                      <Td>
+                        {item.status === 'submitted' ? (
+                          <Tag colorScheme="green" borderRadius="full" size="sm">
+                            <TagLabel>Graded</TagLabel>
+                          </Tag>
+                        ) : item.status === 'Graded' ? (
+                          <Tag colorScheme="green" borderRadius="full" size="sm">
+                            <TagLabel>Graded</TagLabel>
+                          </Tag>
+                        ) : item.status === 'waiting for graded' ? (
+                          <Tag colorScheme="blue" borderRadius="full" size="sm">
+                            <TagLabel>Waiting Graded</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Tag colorScheme="red" borderRadius="full" size="sm">
+                            <TagLabel>Not Submitted</TagLabel>
+                          </Tag>
+                        )}
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan={5} className="text-center py-5 text-Gray-600">
+                      Tidak ada hasil ditemukan
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </TableContainer>

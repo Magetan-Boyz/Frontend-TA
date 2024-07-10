@@ -1,59 +1,59 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Select, Table, Thead, Tr, Tbody, Th, Td } from '@chakra-ui/react';
+import { Select, Table, Thead, Tr, Tbody, Th, Td, Spinner, Tag, TagLabel } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 import Image from 'next/image';
 
 export default function DetailPengumpulanLiterasi() {
   const router = useRouter();
-  const [user] = React.useState([
-    {
-      id: 1,
-      nama: 'Dominica',
-      email: 'dominica@gmail.com',
-      judul: 'Judul Literasi',
-      totalpoint: '10',
-      catatan: 'Pass'
-    },
-    {
-      id: 2,
-      nama: 'Dominica',
-      email: 'dominica@gmail.com',
-      judul: 'Judul Literasi',
-      totalpoint: '-',
-      catatan: 'Pending'
-    },
-    {
-      id: 3,
-      nama: 'Dominica',
-      email: 'dominica@gmail.com',
-      judul: 'Judul Literasi',
-      totalpoint: '10',
-      catatan: 'Pending'
+  const { classId } = router.query;
+  const [literationDetails, setLiterationDetails] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (classId) {
+      fetchLiterationDetails(classId);
     }
-  ]);
+  }, [classId]);
+
+  const fetchLiterationDetails = async (classId) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/literation`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const filteredData = response.data.data.filter((item) => item.student_class_id === classId);
+      setLiterationDetails(filteredData);
+    } catch (error) {
+      console.error('Error fetching literation details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout>
+        <Seo templateTitle="Detail Pengumpulan Literasi" />
+        <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white flex justify-center items-center">
+          <Spinner size="xl" />
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <div>
       <AuthenticatedLayout>
-        <Seo templateTitle="Literasi" />
+        <Seo templateTitle="Detail Pengumpulan Literasi" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">Detail Pengumpulan</h1>
-            <div className="flex flex-col lg:flex-row gap-7">
-              <h1 className="font-semibold text-Gray-600">
-                <span className="font-medium text-Gray-500">Deadline Pengumpulan :</span> January 6, 2023 11:59 AM
-              </h1>
-              <h1 className="font-semibold text-Gray-600">
-                <span className="font-medium text-Gray-500">Total Points :</span> 50
-              </h1>
-              <h1 className="font-semibold text-Gray-600">
-                <span className="font-medium text-Gray-500">Point Minimum Lulus :</span> 25
-              </h1>
-            </div>
           </div>
           <div className="flex flex-col gap-4 px-3 py-6">
             <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
@@ -73,35 +73,64 @@ export default function DetailPengumpulanLiterasi() {
                   <Th>Judul Literasi</Th>
                   <Th>Total Point</Th>
                   <Th>Catatan Guru</Th>
+                  <Th>Status Penilaian</Th>
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {user.map((item, index) => (
-                  <Tr key={index}>
-                    <Td className="flex gap-2">
-                      <Image
-                        src={`https://ui-avatars.com/api/?name=${item.nama}`}
-                        alt="Logo"
-                        width={40}
-                        height={24}
-                        className="rounded-full"
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-Gray-900">{item.nama}</span>{' '}
-                        <span className="text-sm text-Gray-600">{item.email}</span>
-                      </div>
-                    </Td>
-                    <Td className="text-sm text-Gray-900">{item.judul}</Td>
-                    <Td className="text-sm text-Gray-900">{item.totalpoint}/50</Td>
-                    <Td>{item.catatan}</Td>
-                    <Td>
-                      <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/tugas/literasi/detail/${item.id}`)}>
-                        {item.totalpoint === '-' || item.totalpoint === '0' ? 'Evaluate' : 'Detail'}
-                      </SecondaryButton>
+                {literationDetails.length > 0 ? (
+                  literationDetails.map((item) => (
+                    <Tr key={item.id}>
+                      <Td className="">
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={`https://ui-avatars.com/api/?name=${item.student}`}
+                            alt="Logo"
+                            width={40}
+                            height={24}
+                            className="rounded-full"
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-Gray-900">{item.student}</span>
+                          </div>
+                        </div>
+                      </Td>
+                      <Td className="text-sm text-Gray-900">{item.title}</Td>
+                      <Td className="text-sm text-Gray-900">{item.point}</Td>
+                      <Td>{item.feedback || 'Belum ada catatan'}</Td>
+                      <Td>
+                        {item.status ? (
+                          <Tag colorScheme="green">
+                            <TagLabel>Sudah Dinilai</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Tag colorScheme="red">
+                            <TagLabel>Belum Dinilai</TagLabel>
+                          </Tag>
+                        )}
+                      </Td>
+                      <Td>
+                        <SecondaryButton
+                          btnClassName="font-semibold"
+                          onClick={() =>
+                            router.push({
+                              pathname: `/guru/tugas/literasi/detail/${item.id}`,
+                              query: { id: item.id }
+                            })
+                          }
+                        >
+                          {item.point === '-' || item.point === 0 ? 'Evaluate' : 'Detail'}
+                        </SecondaryButton>
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan="6" className="text-center">
+                      Tidak ada data literasi yang ditemukan.
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </div>

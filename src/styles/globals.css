@@ -27,3 +27,7 @@
   border-collapse: collapse;
   user-select: none;
 }
+
+nextjs-portal {
+  display: none;
+}

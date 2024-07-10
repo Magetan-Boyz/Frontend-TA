@@ -1,75 +1,137 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
-import { Avatar, AvatarGroup, Button } from '@chakra-ui/react';
-import { MdAdd } from 'react-icons/md';
+import { Button, useToast } from '@chakra-ui/react';
 import DetailMateri from '@/components/materi/DetailMateri';
 import KontenMateri from '@/components/materi/KontenMateri';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
 export default function CreateMateri() {
+  const toast = useToast();
+  const router = useRouter();
+  const { matterId } = router.query;
   const [showKonten, setShowKonten] = React.useState('detailmateri');
-  const [detailMateri, setDetailMateri] = React.useState(false);
-  const [kontenMateri, setKontenMateri] = React.useState(false);
-  const [classNameDetail, setClassNameDetail] = React.useState('');
-  const [classNameKonten, setClassNameKonten] = React.useState('');
+  const [detailMateri, setDetailMateri] = React.useState({ title: '', description: '' });
+  const [kontenMateri, setKontenMateri] = React.useState([{ title: 'Sesi 1', description: '', link: '' }]);
 
-  const handleDetailMateri = (value: string) => {
+  React.useEffect(() => {
+    if (matterId) {
+      fetchMatterDetail(matterId);
+    }
+  }, [matterId]);
+
+  const fetchMatterDetail = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/matter/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setDetailMateri({ title: response.data.data.title, description: response.data.data.description });
+      setKontenMateri(response.data.data.content || []);
+    } catch (error) {
+      console.error('Error fetching matter details:', error);
+    }
+  };
+
+  const handleDetailMateri = (value) => {
     setShowKonten(value);
   };
 
-  React.useEffect(() => {
-    if (showKonten === 'detailmateri') {
-      setDetailMateri(true);
-      setClassNameDetail('bg-Primary-50 text-Primary-700');
-      setKontenMateri(false);
-    } else {
-      setDetailMateri(false);
-      setClassNameKonten('bg-Primary-50 text-Primary-700');
-      setKontenMateri(true);
+  const handleSave = async () => {
+    const data = {
+      title: detailMateri.title,
+      description: detailMateri.description,
+      content: kontenMateri
+    };
+
+    try {
+      if (matterId) {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/matter/${matterId}/update`, data, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+      } else {
+        const subjectId = localStorage.getItem('subjectId'); // Ensure subjectId is stored in local storage
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/${subjectId}/matter`, data, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+      }
+      toast({
+        title: 'Berhasil',
+        description: 'Materi berhasil disimpan',
+        status: 'success',
+        duration: 5000,
+        isClosable: true
+      });
+      localStorage.removeItem('subjectId');
+      router.push('/guru/materi/preview');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Gagal menyimpan materi: ${error}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
     }
-  }, [showKonten]);
+  };
+
+  const handleDelete = async () => {
+    if (!matterId) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/matter/${matterId}/delete`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast({
+        title: 'Berhasil',
+        description: 'Materi berhasil dihapus',
+        status: 'success',
+        duration: 5000,
+        isClosable: true
+      });
+      router.push('/guru/materi/preview');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Gagal menghapus materi: ${error}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+    }
+  };
+
   return (
-    <div>
-      <AuthenticatedLayout>
-        <Seo templateTitle="Tambah Materi" />
-        <div className="flex flex-col justify-between w-full p-5 rounded-md lg:items-center lg:flex-row h-fit bg-Base-white">
-          <div>
-            <Button
-              className={`font-semibold ${classNameDetail}`}
-              variant="ghost"
-              colorScheme="blue"
-              value="detailmateri"
-              onClick={() => handleDetailMateri('detailmateri')}
-            >
-              Detail Materi
-            </Button>
-            <Button
-              className={`font-semibold ${classNameKonten}`}
-              variant="ghost"
-              colorScheme="blue"
-              value="kontenmateri"
-              onClick={() => handleDetailMateri('kontenmateri')}
-            >
-              Konten Materi
-            </Button>
-          </div>
-          <div className="flex flex-col items-end justify-between gap-3 lg:items-center lg:flex-row">
-            <AvatarGroup size="sm" max={5}>
-              <Avatar name="Ryan Florence" src="https://bit.ly/ryan-florence" />
-              <Avatar name="Segun Adebayo" src="https://bit.ly/sage-adebayo" />
-              <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-              <Avatar name="Prosper Otemuyiwa" src="https://bit.ly/prosper-baba" />
-              <Avatar name="Christian Nwamba" src="https://bit.ly/code-beast" />
-            </AvatarGroup>
-            <Button leftIcon={<MdAdd />} colorScheme="gray" variant="outline">
-              Tambah Guru Pengajar
-            </Button>
-          </div>
+    <AuthenticatedLayout>
+      <Seo templateTitle="Tambah Materi" />
+      <div className="flex flex-col justify-between w-full p-5 rounded-md lg:items-center lg:flex-row h-fit bg-Base-white">
+        <div>
+          <Button
+            className={`font-semibold ${showKonten === 'detailmateri' ? 'bg-Primary-50 text-Primary-700' : ''}`}
+            variant="ghost"
+            colorScheme="blue"
+            onClick={() => handleDetailMateri('detailmateri')}
+          >
+            Detail Materi
+          </Button>
+          <Button
+            className={`font-semibold ${showKonten === 'kontenmateri' ? 'bg-Primary-50 text-Primary-700' : ''}`}
+            variant="ghost"
+            colorScheme="blue"
+            onClick={() => handleDetailMateri('kontenmateri')}
+          >
+            Konten Materi
+          </Button>
         </div>
-        {detailMateri && <DetailMateri />}
-        {kontenMateri && <KontenMateri />}
-      </AuthenticatedLayout>
-    </div>
+      </div>
+      {showKonten === 'detailmateri' && (
+        <DetailMateri detailMateri={detailMateri} setDetailMateri={setDetailMateri} handleSave={handleSave} handleDelete={handleDelete} />
+      )}
+      {showKonten === 'kontenmateri' && <KontenMateri kontenMateri={kontenMateri} setKontenMateri={setKontenMateri} />}
+    </AuthenticatedLayout>
   );
 }

@@ -13,7 +13,8 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  useDisclosure
+  useDisclosure,
+  Spinner
 } from '@chakra-ui/react';
 import { PiFlagBannerBold } from 'react-icons/pi';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -21,57 +22,70 @@ import SecondaryButton from '@/components/SecondaryButton';
 import { MdAdd } from 'react-icons/md';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { AiOutlineDrag } from 'react-icons/ai';
-import { BsEye, BsEyeSlash, BsLink } from 'react-icons/bs';
-import { MdKeyboardArrowDown, MdOutlineAddBox } from 'react-icons/md';
+import axios from 'axios';
+import { MdOutlineAddBox, MdKeyboardArrowDown } from 'react-icons/md';
 
-// Define types for the items and state
 type Item = {
   id: string;
   content: string;
+  created_at: string; // Assuming the API provides a created_at field
   sub?: string[];
-  visible: string;
 };
 
-const initialItems: Item[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    content: 'IPA Fotosintesis Dasar',
-    sub: ['IPA Fotosintesis Dasar', 'IPA Fotosintesis Menengah', 'IPA Fotosintesis Tingkat Lanjut'],
-    visible: 'hidden'
-  },
-  {
-    id: '4e0c103b-e191-4fca-97b8-13541e4a49fd',
-    content: 'Menanam Jagung',
-    sub: ['Menanam Jagung', 'Menanam Jagung', 'Menanam Jagung'],
-    visible: 'all'
-  },
-  {
-    id: '62a5cfb7-ff85-42b7-a244-9b3312a71718',
-    content: 'Menanam Jagung',
-    sub: ['Menanam Jagung', 'Menanam Jagung', 'Menanam Jagung'],
-    visible: 'invited'
-  }
-];
-
-export default function Susun() {
-  const [items, setItems] = React.useState<Item[]>(initialItems);
+const Susun = () => {
+  const [items, setItems] = React.useState<Item[]>([]);
+  const [subjects, setSubjects] = React.useState([]);
+  const [selectedSubject, setSelectedSubject] = React.useState('');
   const [winReady, setWinReady] = React.useState(false);
   const [expanded, setExpanded] = React.useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newItemContent, setNewItemContent] = React.useState<string>('');
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     setWinReady(true);
+    fetchSubjects();
   }, []);
 
-  const handleOnDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    const reorderedItems = Array.from(items);
-    const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
-    reorderedItems.splice(result.destination.index, 0, reorderedItem);
-    setItems(reorderedItems);
+  const fetchSubjects = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSubjects(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching subjects:', error);
+    }
+  };
+
+  const handleSubjectChange = async (e) => {
+    const selectedSubject = e.target.value;
+    setSelectedSubject(selectedSubject);
+    if (selectedSubject) {
+      fetchMatters(selectedSubject);
+    }
+  };
+
+  const fetchMatters = async (subjectId) => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/${subjectId}/matter`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = response.data.data.map((matter) => ({
+        id: matter.id,
+        content: matter.title,
+        created_at: matter.created_at, // Assuming the API provides a created_at field
+        sub: matter.content.map((subContent) => subContent.title)
+      }));
+      setItems(data);
+    } catch (error) {
+      console.error('Error fetching matters:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleExpand = (id: string) => {
@@ -80,12 +94,24 @@ export default function Susun() {
 
   const addItem = () => {
     const newItem: Item = {
-      id: (Math.random() * 100000).toString(), // Generate a random ID for simplicity
+      id: (Math.random() * 100000).toString(),
       content: newItemContent,
-      visible: 'hidden' // Default visibility
+      created_at: new Date().toISOString()
     };
     setItems([...items, newItem]);
     onClose();
+  };
+
+  const handleSortChange = (e) => {
+    const sortOrder = e.target.value;
+    const sortedItems = [...items].sort((a, b) => {
+      if (sortOrder === 'newest') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+    });
+    setItems(sortedItems);
   };
 
   return (
@@ -93,28 +119,15 @@ export default function Susun() {
       <Seo templateTitle="Susunan Materi" />
       <div className="flex items-center justify-between w-full gap-4 p-5 rounded-md h-fit bg-Base-white">
         <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-          <Select placeholder="Pilih Kelas" size="md">
-            <option value="1">X</option>
-            <option value="2">XI</option>
-            <option value="3">XII</option>
+          <Select placeholder="Pilih Mata Pelajaran" size="md" onChange={handleSubjectChange}>
+            {subjects.map((subjectGroup) =>
+              subjectGroup.subject.map((subject) => (
+                <option key={subject.subject_id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))
+            )}
           </Select>
-          <Select placeholder="Pilih Kelas" size="md">
-            <option value="1">X</option>
-            <option value="2">XI</option>
-            <option value="3">XII</option>
-          </Select>
-        </div>
-        <div className="flex flex-col items-end justify-between gap-3 lg:items-center lg:flex-row">
-          <AvatarGroup size="sm" max={5}>
-            <Avatar name="Ryan Florence" src="https://bit.ly/ryan-florence" />
-            <Avatar name="Segun Adebayo" src="https://bit.ly/sage-adebayo" />
-            <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-            <Avatar name="Prosper Otemuyiwa" src="https://bit.ly/prosper-baba" />
-            <Avatar name="Christian Nwamba" src="https://bit.ly/code-beast" />
-          </AvatarGroup>
-          <Button leftIcon={<MdAdd />} colorScheme="gray" variant="outline">
-            Tambah Guru Pengajar
-          </Button>
         </div>
       </div>
 
@@ -124,82 +137,49 @@ export default function Susun() {
             Susunan Materi
           </Text>
           <div>
-            <Button colorScheme="gray" variant="outline">
-              Preview
-            </Button>
+            <Select placeholder="Sort" size="md" onChange={handleSortChange}>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+            </Select>
           </div>
         </div>
 
-        {winReady && (
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-            <Droppable droppableId="droppable-accordion">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="droppable-accordion">
-                  {items.map(({ id, content, visible }, index) => (
-                    <Draggable key={id} draggableId={id} index={index}>
-                      {(provided) => (
-                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-4">
-                          <div
-                            className="flex items-center justify-between p-3 cursor-pointer bg-Gray-100"
-                            onClick={() => toggleExpand(id)}
-                          >
-                            <div className="flex items-center gap-5">
-                              <AiOutlineDrag className="text-xl" />
-                              <div className="p-3 rounded-md bg-Base-white">
-                                {visible === 'hidden' ? (
-                                  <BsEyeSlash className="text-xl" />
-                                ) : visible === 'all' ? (
-                                  <BsEye className="text-xl" />
-                                ) : (
-                                  <BsLink className="text-xl" />
-                                )}
-                              </div>
-                              <Tag colorScheme="blue" borderRadius="full" border={1} size="sm">
-                                {id.slice(0, 4)}
-                              </Tag>
-                              <h1 className="font-bold text-md">{content}</h1>
-                            </div>
-                            <div className="flex items-center gap-5">
-                              {visible === 'invited' ? (
-                                <>
-                                  <AvatarGroup size="sm" max={5} className="hidden md:block">
-                                    <Avatar name="Ryan Florence" src="https://bit.ly/ryan-florence" />
-                                    <Avatar name="Segun Adebayo" src="https://bit.ly/sage-adebayo" />
-                                    <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-                                    <Avatar name="Prosper Otemuyiwa" src="https://bit.ly/prosper-baba" />
-                                    <Avatar name="Christian Nwamba" src="https://bit.ly/code-beast" />
-                                  </AvatarGroup>
-                                  <Button leftIcon={<MdAdd />} colorScheme="gray" bg="white" size="sm" variant="outline">
-                                    Tambah Siswa
-                                  </Button>
-                                </>
-                              ) : (
-                                ''
-                              )}
-                              <MdKeyboardArrowDown className={`text-xl ${expanded === id ? 'transform rotate-180' : ''}`} />
-                            </div>
-                          </div>
-                          {expanded === id && (
-                            <>
-                              {items[index].sub?.map((item, index) => (
-                                <div key={index} className="p-5 border-b border-Gray-200">
-                                  <h1 className="font-bold text-md">Content for {item}</h1>
-                                </div>
-                              ))}
-                              <button className="flex items-center w-full gap-5 p-5 border-b border-Gray-200">
-                                <MdOutlineAddBox className="text-xl" /> <h1 className="font-bold text-md">Tambah Sesi</h1>
-                              </button>
-                            </>
-                          )}
+        {loading ? (
+          <div className="flex justify-center items-center py-6">
+            <Spinner size="xl" />
+          </div>
+        ) : (
+          winReady && (
+            <div>
+              {items.map(({ id, content, sub }) => (
+                <div key={id} className="mb-4">
+                  <div className="flex items-center justify-between p-3 cursor-pointer bg-Gray-100" onClick={() => toggleExpand(id)}>
+                    <div className="flex items-center gap-5">
+                      <Tag colorScheme="blue" borderRadius="full" border={1} size="sm">
+                        {id.slice(0, 4)}
+                      </Tag>
+                      <h1 className="font-bold text-md">{content}</h1>
+                    </div>
+                    <div className="flex items-center gap-5">
+                      <MdKeyboardArrowDown className={`text-xl ${expanded === id ? 'transform rotate-180' : ''}`} />
+                    </div>
+                  </div>
+                  {expanded === id && (
+                    <>
+                      {sub?.map((subItem, subIndex) => (
+                        <div key={subIndex} className="p-5 border-b border-Gray-200">
+                          <h1 className="font-bold text-md">Content for {subItem}</h1>
                         </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+                      ))}
+                      <button className="flex items-center w-full gap-5 p-5 border-b border-Gray-200">
+                        <MdOutlineAddBox className="text-xl" /> <h1 className="font-bold text-md">Tambah Sesi</h1>
+                      </button>
+                    </>
+                  )}
                 </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+              ))}
+            </div>
+          )
         )}
         <div className="flex justify-end p-5">
           <Button leftIcon={<MdAdd />} colorScheme="gray" onClick={onOpen} variant="outline" mr={2}>
@@ -224,9 +204,11 @@ export default function Susun() {
                 Referensi Materi
               </label>
               <Select placeholder="Pilih Materi" size="md" name="sort" className="mt-3" onChange={(e) => setNewItemContent(e.target.value)}>
-                <option value="IPA Fotosintesis Dasar">IPA Fotosintesis Dasar</option>
-                <option value="IPA Fotosintesis Menengah">IPA Fotosintesis Menengah</option>
-                <option value="IPA Fotosintesis Tingkat Lanjut">IPA Fotosintesis Tingkat Lanjut</option>
+                {items.map((item) => (
+                  <option key={item.id} value={item.content}>
+                    {item.content}
+                  </option>
+                ))}
               </Select>
             </form>
           </ModalBody>
@@ -242,4 +224,6 @@ export default function Susun() {
       </Modal>
     </AuthenticatedLayout>
   );
-}
+};
+
+export default Susun;
