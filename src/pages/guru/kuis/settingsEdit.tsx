@@ -9,23 +9,46 @@ import axios from 'axios';
 
 export default function Settings() {
   const [quizData, setQuizData] = React.useState({
-    id: '', // Assuming the quiz ID is stored in localStorage
+    id: '',
     title: '',
     description: '',
-    deadline: ''
+    deadline: '',
+    type_of_quiz: '' // Added type_of_quiz to the state
   });
   const router = useRouter();
   const toast = useToast();
+  const { quizid } = router.query; // Get quiz ID from query parameters
 
   React.useEffect(() => {
-    const storedQuiz = JSON.parse(localStorage.getItem('quiz'));
-    setQuizData({
-      id: storedQuiz.id || '',
-      title: storedQuiz.title || '',
-      description: storedQuiz.description || '',
-      deadline: storedQuiz.deadline ? new Date(storedQuiz.deadline).toISOString().split('T')[0] : ''
-    });
-  }, []);
+    if (quizid) {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/${quizid}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          const quiz = response.data.data;
+          setQuizData({
+            id: quizid,
+            title: quiz.title || '',
+            description: quiz.description || '',
+            deadline: quiz.deadline ? new Date(quiz.deadline).toISOString().split('T')[0] : '',
+            type_of_quiz: quiz.type_of_quiz || '' // Set type_of_quiz from the fetched data
+          });
+        })
+        .catch((error) => {
+          console.error('Error fetching quiz details:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to fetch quiz details',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+        });
+    }
+  }, [quizid]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +73,7 @@ export default function Settings() {
     const token = localStorage.getItem('token');
     const updatedQuizData = {
       title: quizData.title,
-      type_of_quiz: 'Multiple Answer', // Assuming the quiz type is 'Multiple Answer', update if necessary
+      type_of_quiz: quizData.type_of_quiz, // Use the type_of_quiz from the fetched data
       description: quizData.description,
       deadline: new Date(quizData.deadline).toISOString()
     };
@@ -68,7 +91,6 @@ export default function Settings() {
         duration: 5000,
         isClosable: true
       });
-      localStorage.removeItem('quiz');
       router.push('/guru/kuis/list');
     } catch (error) {
       console.error('Error updating quiz:', error);
@@ -91,13 +113,11 @@ export default function Settings() {
             <div className="flex items-center gap-3">
               <PrimaryButton
                 btnClassName="w-fit h-fit bg-Base-White text-Primary-500 rounded"
-                onClick={() => router.push(`/guru/kuis/edit?id=${id}`)}
+                onClick={() => router.push(`/guru/kuis/edit?id=${quizid}`)}
               >
                 Pertanyaan
               </PrimaryButton>
-              <PrimaryButton btnClassName="w-fit h-fit bg-Primary-50 text-Primary-700 rounded" onClick={() => console.log('clicked')}>
-                Pengaturan
-              </PrimaryButton>
+              <PrimaryButton btnClassName="w-fit h-fit bg-Primary-50 text-Primary-700 rounded">Pengaturan</PrimaryButton>
             </div>
             <div className="flex items-center gap-3">
               <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSave}>

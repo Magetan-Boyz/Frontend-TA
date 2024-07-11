@@ -87,9 +87,15 @@ export default function PilihanGanda() {
       correct_answer: correctAnswer
     };
 
+    const url = questionid
+      ? `${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/question/${questionid}/update`
+      : `${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/${quizid}/question/add`;
+
     try {
-      // Send API request using Axios
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/question/${questionid}/update`, newQuestion, {
+      const response = await axios({
+        method: questionid ? 'put' : 'post',
+        url: url,
+        data: newQuestion,
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -101,7 +107,11 @@ export default function PilihanGanda() {
         if (Array.isArray(quizzes)) {
           const quizIndex = quizzes.findIndex((q) => q.id === quizid);
           if (quizIndex > -1) {
-            quizzes[quizIndex].questions[questionIndex] = newQuestion;
+            if (questionid) {
+              quizzes[quizIndex].questions[questionIndex] = newQuestion;
+            } else {
+              quizzes[quizIndex].questions.push(newQuestion);
+            }
             localStorage.setItem('quizzes', JSON.stringify(quizzes));
           }
         } else {
@@ -110,21 +120,24 @@ export default function PilihanGanda() {
 
         toast({
           title: 'Success',
-          description: 'Question updated successfully',
+          description: `Question ${questionid ? 'updated' : 'added'} successfully`,
           status: 'success',
           duration: 3000,
           isClosable: true
         });
         localStorage.setItem('question', JSON.stringify(newQuestion));
-        router.push('/guru/kuis/edit'); // Redirect to the appropriate page after saving
+        router.push({
+          pathname: '/guru/kuis/edit',
+          query: { id: quizid }
+        }); // Redirect to the appropriate page after saving
       } else {
         throw new Error(`Unexpected response status: ${response.status}`); // Trigger catch block for non-successful responses
       }
     } catch (error) {
-      console.error('Error updating question:', error);
+      console.error('Error saving question:', error);
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Failed to update question',
+        description: error.response?.data?.message || `Failed to ${questionid ? 'update' : 'add'} question`,
         status: 'error',
         duration: 3000,
         isClosable: true
@@ -145,7 +158,7 @@ export default function PilihanGanda() {
         <Seo title="Edit Pertanyaan Pilihan Ganda" />
         <div className="w-full p-3 border rounded-md shadow border-Gray-200 bg-Base-white h-fit">
           <div className="p-3 border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">Edit Pilihan Ganda</h1>
+            <h1 className="text-lg font-semibold">{questionid ? 'Edit' : 'Add'} Pilihan Ganda</h1>
           </div>
           <div className="flex flex-col gap-5 p-5">
             <label htmlFor="pertanyaan" className="text-sm font-semibold text-Gray-600">
@@ -202,7 +215,7 @@ export default function PilihanGanda() {
               <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSaveQuestion}>
                 Simpan
               </PrimaryButton>
-              <SecondaryButton btnClassName="w-fit h-fit" onClick={() => router.push('/guru/kuis/create')}>
+              <SecondaryButton btnClassName="w-fit h-fit" onClick={() => router.push(`/guru/kuis/edit?id=${quizid}`)}>
                 Batalkan
               </SecondaryButton>
             </div>

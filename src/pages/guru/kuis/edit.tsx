@@ -3,45 +3,79 @@ import SecondaryButton from '@/components/SecondaryButton';
 import Seo from '@/components/Seo';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import * as React from 'react';
-import { BsEye } from 'react-icons/bs';
-import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiEdit } from 'react-icons/fi';
 import { HiDotsVertical } from 'react-icons/hi';
 import { Menu, MenuButton, IconButton, MenuList, MenuItem, useToast } from '@chakra-ui/react';
 import { MdAdd } from 'react-icons/md';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 export default function QuizDetail() {
   const [questions, setQuestions] = React.useState([]);
   const [quizTitle, setQuizTitle] = React.useState('');
+  const [quizType, setQuizType] = React.useState('');
   const router = useRouter();
   const toast = useToast();
-
-  console.log(questions);
+  const { id } = router.query; // Get quiz ID from query parameters
 
   React.useEffect(() => {
-    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    setQuestions(quizzes.questions || []);
-    setQuizTitle(quizzes.title || '');
-  }, []);
+    if (id) {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/quiz/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          const quiz = response.data.data;
+          setQuestions(quiz.questions || []);
+          setQuizTitle(quiz.title || '');
+          setQuizType(quiz.type_of_quiz || '');
+        })
+        .catch((error) => {
+          console.error('Error fetching quiz:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to fetch quiz details',
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+          });
+        });
+    }
+  }, [id]);
 
   const handleAddQuestion = () => {
-    // Add logic to handle adding a question
-  };
-
-  const handleSaveQuiz = () => {
-    // Add logic to handle saving the quiz
+    if (quizType === 'Multiple Choice') {
+      router.push({
+        pathname: '/guru/kuis/edit/pilihanganda',
+        query: { quizid: id }
+      });
+    } else if (quizType === 'Essay') {
+      router.push({
+        pathname: '/guru/kuis/edit/essay',
+        query: { quizid: id }
+      });
+    }
   };
 
   const handleEditQuestion = (questionid, questionIndex, question) => {
+    const editPath = quizType === 'Multiple Choice' ? '/guru/kuis/edit/pilihanganda' : '/guru/kuis/edit/essay';
     router.push({
-      pathname: '/guru/kuis/edit/pilihanganda',
-      query: { questionid, questionIndex, question: JSON.stringify(question) }
+      pathname: editPath,
+      query: { quizid: id, questionid, questionIndex, question: JSON.stringify(question) }
     });
   };
 
   const handleBack = () => {
-    localStorage.removeItem('quizzes');
     router.push('/guru/kuis/list');
+  };
+
+  const handleSettingsEdit = () => {
+    router.push({
+      pathname: '/guru/kuis/settingsEdit',
+      query: { quizid: id }
+    });
   };
 
   return (
@@ -54,10 +88,7 @@ export default function QuizDetail() {
               <PrimaryButton btnClassName="w-fit h-fit bg-Primary-50 text-Primary-700 rounded" onClick={() => console.log('clicked')}>
                 Pertanyaan
               </PrimaryButton>
-              <PrimaryButton
-                btnClassName="w-fit h-fit bg-Base-white text-Gray-500 rounded"
-                onClick={() => router.push('/guru/kuis/settingsEdit')}
-              >
+              <PrimaryButton btnClassName="w-fit h-fit bg-Base-white text-Gray-500 rounded" onClick={handleSettingsEdit}>
                 Pengaturan
               </PrimaryButton>
             </div>

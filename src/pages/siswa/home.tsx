@@ -41,15 +41,20 @@ export default function Home() {
   const router = useRouter();
   const [announcement, setAnnouncement] = React.useState<Announcement[]>([]);
   const [disabledDays, setDisabledDays] = React.useState<Date[]>([]);
-  const [grades, setGrades] = React.useState<Grade[]>([]);
+  const [grades, setGrades] = React.useState([]);
   const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
   const [schedule, setSchedule] = React.useState<ScheduleItem[]>([]);
-  const [semester, setSemester] = React.useState(1);
-  const [academicYear, setAcademicYear] = React.useState(new Date().getFullYear());
+  const [semester, setSemester] = React.useState('1');
+  const [academicYear, setAcademicYear] = React.useState('2023 - 2024');
   const [loadingSchedule, setLoadingSchedule] = React.useState(true);
   const [attendance, setAttendance] = React.useState([]);
   const [groupedAttendance, setGroupedAttendance] = React.useState([]);
   const [username, setUsername] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchGrades(semester, academicYear);
+  }, [semester, academicYear]);
 
   const dayOfWeekMap: { [key: number]: string } = {
     1: 'Monday',
@@ -61,19 +66,31 @@ export default function Home() {
     7: 'Sunday'
   };
 
-  const fetchGrades = async (semester: number, academicYear: number) => {
+  React.useEffect(() => {
+    if (semester && academicYear) {
+      fetchGrades();
+    }
+  }, [semester, academicYear]);
+
+  const fetchGrades = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/student/grades?semester=${semester}&academic_year=${academicYear}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/grade`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          semester,
+          academicYear
         }
-      );
-      setGrades(response.data.data);
+      });
+      const data = response.data.data || [];
+      setGrades(data);
     } catch (error) {
       console.error('Error fetching grades:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -247,6 +264,56 @@ export default function Home() {
                     </SecondaryButton>
                   </div>
                 ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <span className="flex justify-between">
+                <h1 className="text-lg font-semibold">Rangkuman Nilai</h1>
+                <button className="font-semibold text-Primary-500" onClick={() => router.push(`/siswa/nilai/list`)}>
+                  Lihat Semua
+                </button>
+              </span>
+              <div className="flex flex-col justify-between border border-Gray-200 gap-4 rounded-xl bg-Base-white">
+                <TableContainer className="">
+                  <Table className="">
+                    <Thead className="bg-Gray-50">
+                      <Tr>
+                        <Th>No</Th>
+                        <Th>Mata Pelajaran</Th>
+                        <Th>Rata-Rata Formatif</Th>
+                        <Th>Rata-Rata Sumatif</Th>
+                        <Th>Rata-Rata Proyek</Th>
+                        <Th>Nilai Akhir</Th>
+                        <Th></Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {loading ? (
+                        <Tr>
+                          <Td colSpan="7" className="text-center">
+                            Loading...
+                          </Td>
+                        </Tr>
+                      ) : (
+                        grades.map((item, index) => (
+                          <Tr key={item.id}>
+                            <Td>{index + 1}</Td>
+                            <Td>{item.subject}</Td>
+                            <Td>{item.formative_scores}</Td>
+                            <Td>{item.summative_scores}</Td>
+                            <Td>{item.project_scores}</Td>
+                            <Td>{item.final_grade}</Td>
+                            <Td>
+                              <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/siswa/nilai/list`)}>
+                                Detail
+                              </SecondaryButton>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
               </div>
             </div>
             <div className="flex flex-col gap-3">

@@ -19,7 +19,7 @@ import {
   Skeleton,
   useToast
 } from '@chakra-ui/react';
-import { FiSearch, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiSearch, FiEdit } from 'react-icons/fi';
 import { HiDotsVertical } from 'react-icons/hi';
 import { useRouter } from 'next/router';
 import { MdClose } from 'react-icons/md';
@@ -113,8 +113,6 @@ export default function List() {
   };
 
   const handleEdit = (quiz) => {
-    // Store the quiz data in local storage
-    localStorage.setItem('quizzes', JSON.stringify(quiz));
     router.push({
       pathname: '/guru/kuis/edit',
       query: { id: quiz.id }
@@ -276,9 +274,6 @@ export default function List() {
                   <MenuList>
                     <MenuItem icon={<FiEdit />} onClick={() => handleEdit(item)}>
                       Edit
-                    </MenuItem>
-                    <MenuItem icon={<FiTrash2 />} onClick={() => handleDelete(item.id)}>
-                      Delete
                     </MenuItem>
                   </MenuList>
                 </Menu>

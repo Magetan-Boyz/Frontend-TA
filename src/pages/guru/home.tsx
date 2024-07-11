@@ -4,7 +4,7 @@ import Seo from '@/components/Seo';
 import { DayPicker } from 'react-day-picker';
 import Holidays from 'date-holidays';
 import ScheduleCard from '@/components/ScheduleCard';
-import { Table, Thead, Tbody, Tr, Th, Skeleton } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Skeleton, TableContainer, Td, Select } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -26,11 +26,13 @@ interface Announcement {
   created_at: string;
 }
 
-interface Subject {
+interface Grade {
   id: number;
-  name: string;
-  semester: number;
-  created_at: string;
+  rataRata: string;
+  nilaiTertinggi: string;
+  nilaiTerendah: string;
+  median: string;
+  created_at: string; // Assuming the grade has a created_at property
 }
 
 export default function Home() {
@@ -38,12 +40,20 @@ export default function Home() {
   const router = useRouter();
   const [announcement, setAnnouncement] = React.useState<Announcement[]>([]);
   const [disabledDays, setDisabledDays] = React.useState<Date[]>([]);
-  const [subjects, setSubjects] = React.useState<Subject[]>([]);
+  const [semester, setSemester] = React.useState('1');
+  const [subject, setSubject] = React.useState([]);
+  const [selectedSubject, setSelectedSubject] = React.useState('');
+  const [academicYear, setAcademicYear] = React.useState('2023-2024');
   const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
   const [schedule, setSchedule] = React.useState<ScheduleItem[]>([]);
   const [loadingAnnouncements, setLoadingAnnouncements] = React.useState(true);
   const [loadingSubjects, setLoadingSubjects] = React.useState(true);
   const [loadingSchedule, setLoadingSchedule] = React.useState(true);
+  const [grades, setGrades] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [attendance, setAttendance] = React.useState([]);
+  const [groupedAttendance, setGroupedAttendance] = React.useState([]);
+  const [username, setUsername] = React.useState('');
 
   const dayOfWeekMap: { [key: number]: string } = {
     1: 'Monday',
@@ -54,6 +64,62 @@ export default function Home() {
     6: 'Saturday',
     7: 'Sunday'
   };
+
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        const data = response.data.data || [];
+        console.log('API Response:', data);
+
+        // Extract all subjects from each teacher in the data array
+        const subjectsArray = data.flatMap((teacher) => teacher.subject);
+        console.log('Extracted Subjects:', subjectsArray);
+
+        setSubject(subjectsArray);
+        setLoadingSubjects(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching subjects:', error);
+        setLoadingSubjects(false);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    if (semester && academicYear) {
+      fetchGrades();
+    }
+  }, [semester, academicYear]);
+
+  const fetchGrades = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/grade`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          semester,
+          academicYear
+        }
+      });
+      const data = response.data.data || [];
+      setGrades(data);
+    } catch (error) {
+      console.error('Error fetching grades:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchGrades(semester, academicYear);
+  }, [semester, academicYear]);
 
   React.useEffect(() => {
     const fetchSchedule = async () => {
@@ -124,27 +190,6 @@ export default function Home() {
 
   React.useEffect(() => {
     axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/admin/subjects/all`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-      .then((response) => {
-        const sortedSubjects =
-          response.data.data
-            ?.sort((a: Subject, b: Subject) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 3) || [];
-        setSubjects(sortedSubjects);
-        setLoadingSubjects(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching subjects:', error);
-        setLoadingSubjects(false);
-      });
-  }, []);
-
-  React.useEffect(() => {
-    axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/global/announcements`)
       .then((response) => {
         const sortedAnnouncements =
@@ -171,6 +216,48 @@ export default function Home() {
   const getDayOfWeek = (date: Date) => {
     const day = date.getDay();
     return day === 0 ? 7 : day;
+  };
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUsername(localStorage.getItem('username') || '');
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/${selectedSubject}/attendance`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          const data = response.data.data || [];
+          console.log('Fetched Attendance Data:', data); // Add logging
+          setAttendance(data);
+          const groupedData = groupAttendanceBySubject(data);
+          console.log('Grouped Attendance Data:', groupedData); // Add logging
+          setGroupedAttendance(groupedData);
+        });
+    }
+  }, [selectedSubject]);
+
+  const groupAttendanceBySubject = (data) => {
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.subject_id]) {
+        acc[item.subject_id] = {
+          subject_name: item.subject_id,
+          total_attendance: 0,
+          total_meetings: 0
+        };
+      }
+      acc[item.subject_id].total_meetings += 1;
+      if (item.attendace_status === 'Hadir') {
+        acc[item.subject_id].total_attendance += 1;
+      }
+      return acc;
+    }, {});
+
+    return Object.values(grouped).map((item) => ({
+      ...item,
+      attendance_percentage: ((item.total_attendance / item.total_meetings) * 100).toFixed(2) + '%'
+    }));
   };
 
   return (
@@ -214,49 +301,125 @@ export default function Home() {
             </div>
             <div className="flex flex-col gap-3">
               <span className="flex justify-between">
-                <h1 className="text-lg font-semibold">List Mata Pelajaran Terbaru</h1>
-                <button className="font-semibold text-Primary-500" onClick={() => router.push(`/admin/mata-pelajaran/list`)}>
+                <h1 className="text-lg font-semibold">Rangkuman Nilai</h1>
+                <button className="font-semibold text-Primary-500" onClick={() => router.push(`/guru/nilai/list`)}>
                   Lihat Semua
                 </button>
               </span>
               <div className="flex flex-col justify-between border border-Gray-200 gap-4 rounded-xl bg-Base-white">
-                {loadingSubjects ? (
-                  <>
-                    <Skeleton height="40px" my="10px" />
-                    <Skeleton height="40px" my="10px" />
-                    <Skeleton height="40px" my="10px" />
-                  </>
-                ) : subjects.length > 0 ? (
+                <div className="p-3 flex gap-3">
+                  <Select placeholder="Pilih Semester" onChange={(e) => setSemester(e.target.value)}>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                  </Select>
+                  <Select placeholder="Pilih Tahun Ajaran" onChange={(e) => setAcademicYear(e.target.value)}>
+                    <option value="2023-2024">2023/2024</option>
+                    <option value="2024-2025">2024/2025</option>
+                    <option value="2025-2026">2025/2026</option>
+                  </Select>
+                </div>
+                <TableContainer className="">
                   <Table className="">
                     <Thead className="bg-Gray-50">
                       <Tr>
                         <Th>No</Th>
-                        <Th>Nama Mata Pelajaran</Th>
-                        <Th>Semester</Th>
+                        <Th>Mata Pelajaran</Th>
+                        <Th>Rata-Rata Formatif</Th>
+                        <Th>Rata-Rata Sumatif</Th>
+                        <Th>Rata-Rata Proyek</Th>
+                        <Th>Nilai Akhir</Th>
                         <Th></Th>
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {subjects.map((item, index) => (
-                        <Tr key={index}>
-                          <Th>{index + 1}</Th>
-                          <Th>{item.name}</Th>
-                          <Th>{item.semester}</Th>
-                          <Th>
-                            <SecondaryButton
-                              onClick={() => router.push(`/admin/mata-pelajaran/list`)}
-                              btnClassName="w-fit h-fit text-sm py-2"
-                            >
-                              Detail
-                            </SecondaryButton>
-                          </Th>
+                      {loading ? (
+                        <Tr>
+                          <Td colSpan="7" className="text-center">
+                            Loading...
+                          </Td>
                         </Tr>
-                      ))}
+                      ) : (
+                        grades.map((item, index) => (
+                          <Tr key={item.id}>
+                            <Td>{index + 1}</Td>
+                            <Td>{item.subject}</Td>
+                            <Td>{item.formative_scores}</Td>
+                            <Td>{item.summative_scores}</Td>
+                            <Td>{item.project_scores}</Td>
+                            <Td>{item.final_grade}</Td>
+                            <Td>
+                              <SecondaryButton btnClassName="font-semibold" onClick={() => router.push(`/guru/nilai/list`)}>
+                                Detail
+                              </SecondaryButton>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
                     </Tbody>
                   </Table>
-                ) : (
-                  <div className="text-center py-5 text-Gray-600">Tidak ada mata pelajaran terbaru</div>
-                )}
+                </TableContainer>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <span className="flex justify-between">
+                <h1 className="text-lg font-semibold">Rangkuman Kehadiran</h1>
+                <button className="font-semibold text-Primary-500" onClick={() => router.push(`/guru/kehadiran/ListKehadiran`)}>
+                  Lihat Semua
+                </button>
+              </span>
+              <div className="flex flex-col justify-between border border-Gray-200 gap-4 rounded-xl bg-Base-white">
+                <div className="p-3 ">
+                  <Select placeholder="Mata Pelajaran" onChange={(e) => setSelectedSubject(e.target.value)}>
+                    {subject.map((item, index) => (
+                      <option key={index} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <TableContainer className="">
+                  <Table variant="simple" className="">
+                    <Thead>
+                      <Tr>
+                        <Th>No</Th>
+                        <Th>Mata Pelajaran</Th>
+                        <Th>Presentase Kehadiran</Th>
+                        <Th>Jumlah Kehadiran</Th>
+                        <Th>Jumlah Pertemuan</Th>
+                        <Th></Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {groupedAttendance.length === 0 ? (
+                        <Tr>
+                          <Td colSpan={6} className="text-center">
+                            No data available
+                          </Td>
+                        </Tr>
+                      ) : (
+                        groupedAttendance.map((item, index) => (
+                          <Tr key={index}>
+                            <Td>{index + 1}</Td>
+                            <Td>{item.subject_name}</Td>
+                            <Td>{item.attendance_percentage}</Td>
+                            <Td>{item.total_attendance}</Td>
+                            <Td>{item.total_meetings}</Td>
+                            <Td>
+                              <SecondaryButton
+                                colorScheme="gray"
+                                variant="outline"
+                                size="md"
+                                onClick={() => router.push(`/guru/kehadiran/ListKehadiran`)}
+                              >
+                                Details
+                              </SecondaryButton>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
               </div>
             </div>
           </div>
