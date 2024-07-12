@@ -47,7 +47,7 @@ export default function Sidebar() {
         <div className="flex justify-between px-7 lg:items-center lg:justify-center">
           <div className="flex gap-2 lg:items-center lg:justify-center">
             <Image src={Logo} alt="Logo" width={32} />
-            <h1 className="font-semibold">Nama SMP</h1>
+            <h1 className="font-semibold">SMPN 1 Magetan</h1>
           </div>
           <button className="lg:hidden" onClick={toggleSidebar}>
             <RiMenu2Line className="text-3xl" />
