@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Logo from '~/logo-smp.png';
 import Image from 'next/image';
 import { SidebarData } from './SidebarData';
@@ -11,9 +11,9 @@ import axios from 'axios';
 
 export default function Sidebar() {
   const router = useRouter();
-  const [username, setUsername] = useState(''); // Add this line
-  const email = 'oliviarodrigo@gmail.com';
-  const subString = email.slice(0, 16) + '...';
+  const [username, setUsername] = useState('');
+  const [isHomeroomTeacher, setIsHomeroomTeacher] = useState(false);
+
   const handleClick = () => {
     router.push('/support');
   };
@@ -26,9 +26,11 @@ export default function Sidebar() {
     setSidebarVisible(!sidebarVisible);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const username = localStorage.getItem('username') || '';
+    const isHomeroom = JSON.parse(localStorage.getItem('is_homeroom_teacher')) || false;
     setUsername(username);
+    setIsHomeroomTeacher(isHomeroom);
   }, []);
 
   const handleLogout = () => {
@@ -53,7 +55,7 @@ export default function Sidebar() {
         </div>
         <div id="sidebar" className={`lg:block place-content-between ${sidebarVisible ? 'block' : 'hidden'}`}>
           <div className="flex flex-col items-start flex-auto w-full gap-2 px-4 py-10">
-            {SidebarData.map((item, index) => {
+            {SidebarData(isHomeroomTeacher).map((item, index) => {
               return <SubMenu item={item} key={index} />;
             })}
           </div>
@@ -72,11 +74,10 @@ export default function Sidebar() {
                 <div className="text-md">Settings</div>
               </button>
               <div className="mx-auto border-t w-full border-[#BBBBBB]">
-                <div className="flex gap-4 mt-6">
+                <div className="flex items-center gap-4 mt-6">
                   <Image src={`https://ui-avatars.com/api/?name=${username}`} alt="Logo" width={40} height={24} className="rounded-full" />
                   <div>
                     <p className="hidden text-sm font-semibold lg:block">{username}</p>
-                    <p className="hidden text-sm text-Gray-600 lg:block">{subString}</p>
                   </div>
                   <button onClick={handleLogout}>
                     <FiLogOut className="text-xl" />

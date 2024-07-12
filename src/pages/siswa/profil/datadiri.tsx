@@ -46,20 +46,15 @@ export default function DetailDataDiri() {
           <Text fontSize="md" fontWeight="semibold">
             Detail Data Diri Siswa
           </Text>
-          <Button
-            colorScheme="gray"
-            variant="outline"
-            size="md"
-            leftIcon={<FiEdit />}
-            paddingLeft={8}
-            paddingRight={8}
-            onClick={() => router.push('/kehadiran/editKehadiran')}
-          >
-            Edit
-          </Button>
         </Flex>
         <Flex align="center" gap={5} p={7}>
-          <Avatar size="2xl" name="Segun Adebayo" src="https://bit.ly/sage-adebayo" showBorder={true} shadow="lg" />
+          <Avatar
+            size="2xl"
+            name={data.name}
+            src={`https://ui-avatars.com/api/?name=${data.name}&size=35&background=random&color=fff`}
+            showBorder={true}
+            shadow="lg"
+          />
           <Box>
             <Text fontSize="3xl" fontWeight="semibold">
               {data.name}

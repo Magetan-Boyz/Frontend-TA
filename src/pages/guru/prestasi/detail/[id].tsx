@@ -28,7 +28,8 @@ export default function DetailPrestasi() {
   const toast = useToast();
   const { id } = router.query;
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [item, setItem] = React.useState([]); // Add initial value
+  const [item, setItem] = React.useState({});
+  const [rejectionNote, setRejectionNote] = React.useState('');
 
   React.useEffect(() => {
     axios
@@ -40,7 +41,7 @@ export default function DetailPrestasi() {
       .then((response) => {
         setItem(response.data.data);
       });
-  }, []);
+  }, [id]);
 
   const handleApprove = async () => {
     try {
@@ -56,7 +57,6 @@ export default function DetailPrestasi() {
         }
       );
       if (response.status === 200) {
-        onClose();
         toast({
           title: 'Success',
           description: 'Achievement has been successfully approved.',
@@ -78,67 +78,107 @@ export default function DetailPrestasi() {
     }
   };
 
+  const handleReject = async () => {
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/teacher/achivement/${id}/update`,
+        {
+          status: `rejected: ${rejectionNote}`
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        toast({
+          title: 'Success',
+          description: 'Achievement has been successfully rejected.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        onClose();
+        router.push('/guru/prestasi/list');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to reject achievement.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+      console.error('Error rejecting achievement:', error);
+    }
+  };
+
+  const handleRejectionNoteChange = (e) => {
+    setRejectionNote(e.target.value);
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
-        <Seo templateTitle="Pengaduan" />
+        <Seo templateTitle="Detail Prestasi" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex flex-col justify-between gap-5 p-3 lg:flex-row lg:border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">Input Prestasi</h1>
+            <h1 className="text-lg font-semibold">Detail Prestasi</h1>
           </div>
           <div className="flex flex-col gap-5 p-3">
             <div className="flex flex-col gap-3">
-              <label htmlFor="pengaduan" className="text-sm font-medium text-Gray-700">
+              <label htmlFor="title" className="text-sm font-medium text-Gray-700">
                 Nama dan Judul Kegiatan
               </label>
               <input
-                name="pengaduan"
-                id="pengaduan"
+                name="title"
+                id="title"
                 className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
-                placeholder="Tuliskan pengaduan kamu disini"
+                placeholder="Tuliskan judul kegiatan disini"
                 value={item.title}
                 disabled
               />
             </div>
             <div className="flex flex-col gap-3">
-              <h1 className="text-sm font-medium text-Gray-700">Jenis Prestasi</h1>
+              <label htmlFor="type_of_achivement" className="text-sm font-medium text-Gray-700">
+                Jenis Prestasi
+              </label>
               <input
-                name="pengaduan"
-                id="pengaduan"
+                name="type_of_achivement"
+                id="type_of_achivement"
                 className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
                 value={item.type_of_achivement}
                 disabled
               />
             </div>
             <div className="flex flex-col gap-3">
-              <h1 className="text-sm font-medium text-Gray-700">Jenis Partisipasi</h1>
+              <label htmlFor="participation" className="text-sm font-medium text-Gray-700">
+                Jenis Partisipasi
+              </label>
               <input
-                name="pengaduan"
-                id="pengaduan"
+                name="participation"
+                id="participation"
                 className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
                 value={item.participation}
                 disabled
               />
             </div>
             <div className="flex flex-col gap-3">
-              <h1 className="text-sm font-medium text-Gray-700">Jenis Tingkat</h1>
-              <input
-                name="pengaduan"
-                id="pengaduan"
-                className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
-                value={item.level}
-                disabled
-              />
+              <label htmlFor="level" className="text-sm font-medium text-Gray-700">
+                Jenis Tingkat
+              </label>
+              <input name="level" id="level" className="w-full p-2 border rounded-lg border-Gray-200 h-fit" value={item.level} disabled />
             </div>
             <div className="flex flex-col gap-3">
-              <label htmlFor="link" className="text-sm text-Gray-700">
+              <label htmlFor="evidence" className="text-sm text-Gray-700">
                 Upload Bukti
               </label>
               <div className="relative flex items-center border rounded-md border-Gray-200">
                 <span className="px-3 border-r text-Gray-600">https://</span>
                 <input
                   type="text"
-                  id="link"
+                  id="evidence"
                   className="w-full p-2 border-0 rounded-r-md focus:outline-none"
                   placeholder="www.example.com"
                   value={item.evidence}
@@ -147,7 +187,9 @@ export default function DetailPrestasi() {
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <label htmlFor="status">Status</label>
+              <label htmlFor="status" className="text-sm text-Gray-700">
+                Status
+              </label>
               {item.status === 'pending' ? (
                 <Tag colorScheme="blue" borderRadius="full" size="sm" className="w-fit">
                   <TagLabel>Wait Approval</TagLabel>
@@ -183,16 +225,18 @@ export default function DetailPrestasi() {
             <ModalCloseButton />
             <ModalBody>
               <h1 className="text-lg font-semibold">Anda Yakin Ingin Menolak Pelaporan Prestasi Siswa?</h1>
-              <form action="" className="mt-3">
+              <form className="mt-3">
                 <div className="flex flex-col mt-2 mb-2">
-                  <label htmlFor="tujuan" className="text-sm text-Gray-600">
+                  <label htmlFor="rejectionNote" className="text-sm text-Gray-600">
                     Masukkan catatan mengapa anda menolak
                   </label>
                   <textarea
-                    name="tujuan"
-                    id="tujuan"
+                    name="rejectionNote"
+                    id="rejectionNote"
                     className="w-full p-2 border rounded-lg border-Gray-200 h-fit"
-                    placeholder="cth : dokumen salah input dan lainnya"
+                    placeholder="cth: dokumen salah input dan lainnya"
+                    value={rejectionNote}
+                    onChange={handleRejectionNoteChange}
                   />
                 </div>
               </form>
@@ -201,7 +245,7 @@ export default function DetailPrestasi() {
               <SecondaryButton onClick={onClose} btnClassName="font-semibold">
                 Batal
               </SecondaryButton>
-              <PrimaryButton onClick={onClose} btnClassName="font-semibold">
+              <PrimaryButton onClick={handleReject} btnClassName="font-semibold">
                 Tolak Pelaporan
               </PrimaryButton>
             </ModalFooter>

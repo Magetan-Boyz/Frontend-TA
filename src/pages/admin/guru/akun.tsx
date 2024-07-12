@@ -27,10 +27,12 @@ import Image from 'next/image';
 import PrimaryButton from '@/components/PrimaryButton';
 import { LuBookOpen } from 'react-icons/lu';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
 export default function ListGuru() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const router = useRouter();
   const [guru, setGuru] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -114,6 +116,53 @@ export default function ListGuru() {
       });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/teacher/import`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status === 201) {
+        toast({
+          title: 'Upload Successful',
+          description: 'CSV file has been uploaded and processed.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true
+        });
+        router.reload();
+      } else {
+        console.error('Failed to upload CSV');
+        toast({
+          title: 'Upload Failed',
+          description: 'There was an error uploading the CSV file.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading CSV:', error);
+      toast({
+        title: 'Upload Failed',
+        description: 'There was an error uploading the CSV file.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      });
+    }
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -122,9 +171,13 @@ export default function ListGuru() {
           <div className="flex items-center justify-between p-3 lg:border-b border-Gray-200">
             <h1 className="text-lg font-semibold">List Guru Mata Pelajaran</h1>
             <div className="flex gap-3">
+              <SecondaryButton size="mini" btnClassName="w-fit h-fit" onClick={() => document.getElementById('csvUpload').click()}>
+                Upload CSV
+              </SecondaryButton>
               <PrimaryButton size="mini" btnClassName="w-fit h-fit" onClick={onOpen}>
                 Buat Akun
               </PrimaryButton>
+              <input type="file" id="csvUpload" style={{ display: 'none' }} accept=".csv" onChange={handleFileChange} />
             </div>
           </div>
           <div className="flex flex-col gap-4 py-6 lg:flex-row lg:justify-between lg:px-3">

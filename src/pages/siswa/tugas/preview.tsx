@@ -18,9 +18,11 @@ export default function PreviewTugas() {
   const [disabledDays, setDisabledDays] = React.useState([]);
   const [selectedDates, setSelectedDates] = React.useState([initiallySelectedDate]);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedSubject, setSelectedSubject] = React.useState(''); // State to hold selected subject
   const calendarContainerRef = React.useRef<HTMLDivElement>(null);
   const toast = useToast();
   const [tasks, setTasks] = React.useState([]);
+  const [subjects, setSubjects] = React.useState([]); // State to hold subjects
   const router = useRouter();
 
   React.useEffect(() => {
@@ -54,6 +56,27 @@ export default function PreviewTugas() {
           isClosable: true
         });
       });
+
+    // Fetch subjects
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/student/class/subjects`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          // Extract unique subject names
+          const uniqueSubjects = Array.from(new Set(response.data.data.map((subject) => subject.subject_name)));
+          setSubjects(uniqueSubjects);
+        } else {
+          setSubjects([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching subjects:', error);
+        setSubjects([]);
+      });
   }, []);
 
   const handleDayClick: DayMouseEventHandler = (day) => {
@@ -68,6 +91,10 @@ export default function PreviewTugas() {
     setSearchTerm(event.target.value);
   };
 
+  const handleSubjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedSubject(event.target.value);
+  };
+
   const handleTaskSubmit = (id: string, title: string) => {
     router.push({
       pathname: `/siswa/tugas/${id}`,
@@ -75,7 +102,12 @@ export default function PreviewTugas() {
     });
   };
 
-  const filteredTasks = tasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Filter tasks by subject and search term
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearchTerm = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject = selectedSubject === '' || task.subject === selectedSubject;
+    return matchesSearchTerm && matchesSubject;
+  });
 
   return (
     <div>
@@ -86,10 +118,13 @@ export default function PreviewTugas() {
             <div className="w-full">
               <h1 className="text-lg font-semibold">Daftar Tugas</h1>
             </div>
-            <Select placeholder="Kelas" size="md" className="w-fit">
-              <option value="1">X</option>
-              <option value="2">XI</option>
-              <option value="3">XII</option>
+            <Select value={selectedSubject} onChange={handleSubjectChange} placeholder="Mata Pelajaran" size="md" className="w-fit">
+              <option value="">Semua Mata Pelajaran</option>
+              {subjects.map((subject, index) => (
+                <option key={index} value={subject}>
+                  {subject}
+                </option>
+              ))}
             </Select>
           </div>
           <DayPicker

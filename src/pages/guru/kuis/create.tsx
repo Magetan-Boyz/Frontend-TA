@@ -48,6 +48,29 @@ export default function CreateKuis() {
     }
   };
 
+  const handleEdit = (index) => {
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      const quizType = quizzes[0].type_of_quiz;
+      const question = questions[index];
+      localStorage.setItem('editQuestion', JSON.stringify({ index, question }));
+      if (quizType === 'Multiple Choice') {
+        router.push('/guru/kuis/question/pilihanganda');
+      } else if (quizType === 'Essay') {
+        router.push('/guru/kuis/question/essay');
+      }
+    }
+  };
+
+  const handleDelete = (index) => {
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      quizzes[0].questions.splice(index, 1);
+      localStorage.setItem('quizzes', JSON.stringify(quizzes));
+      setQuestions(quizzes[0].questions);
+    }
+  };
+
   const handleSaveQuiz = () => {
     const class_id = localStorage.getItem('class_id');
     const subject_id = localStorage.getItem('subject_id');
@@ -86,6 +109,15 @@ export default function CreateKuis() {
     }
   };
 
+  const handlePengaturan = () => {
+    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
+    if (quizzes.length > 0) {
+      const quizData = quizzes[0];
+      localStorage.setItem('quizData', JSON.stringify(quizData));
+      router.push('/guru/kuis/settings');
+    }
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -96,15 +128,12 @@ export default function CreateKuis() {
               <PrimaryButton btnClassName="w-fit h-fit bg-Primary-50 text-Primary-700 rounded" onClick={() => console.log('clicked')}>
                 Pertanyaan
               </PrimaryButton>
-              <PrimaryButton btnClassName="w-fit h-fit bg-Base-white text-Gray-500 rounded" onClick={() => console.log('clicked')}>
+              <PrimaryButton btnClassName="w-fit h-fit bg-Base-white text-Gray-500 rounded" onClick={handlePengaturan}>
                 Pengaturan
               </PrimaryButton>
             </div>
             <div className="flex items-center gap-3">
-              <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<BsEye className="text-lg" />} onClick={() => console.log('clicked')}>
-                Preview
-              </SecondaryButton>
-              <PrimaryButton btnClassName="w-fit h-fit" onClick={handleSaveQuiz}>
+              <PrimaryButton size="mini" btnClassName="w-fit h-fit" onClick={handleSaveQuiz}>
                 Simpan
               </PrimaryButton>
             </div>
@@ -118,8 +147,12 @@ export default function CreateKuis() {
                 <Menu>
                   <MenuButton as={IconButton} icon={<HiDotsVertical className="text-Gray-500" />} variant="ghost" />
                   <MenuList>
-                    <MenuItem icon={<FiEdit />}>Edit</MenuItem>
-                    <MenuItem icon={<FiTrash2 />}>Delete</MenuItem>
+                    <MenuItem icon={<FiEdit />} onClick={() => handleEdit(index)}>
+                      Edit
+                    </MenuItem>
+                    <MenuItem icon={<FiTrash2 />} onClick={() => handleDelete(index)}>
+                      Delete
+                    </MenuItem>
                   </MenuList>
                 </Menu>
               </div>
@@ -128,7 +161,12 @@ export default function CreateKuis() {
             <div className="text-center py-5 text-Gray-600">Tidak ada pertanyaan ditemukan</div>
           )}
           <div className="px-5 pt-5 pb-10 lg:flex lg:justify-end">
-            <SecondaryButton btnClassName="w-full h-fit lg:w-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddQuestion}>
+            <SecondaryButton
+              size="mini"
+              btnClassName="w-full h-fit lg:w-fit"
+              leftIcon={<MdAdd className="text-lg" />}
+              onClick={handleAddQuestion}
+            >
               Pertanyaan
             </SecondaryButton>
           </div>

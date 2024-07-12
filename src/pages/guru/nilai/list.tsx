@@ -238,7 +238,7 @@ export default function NilaiList() {
                 ) : (
                   <Tr>
                     <Td colSpan={8} className="text-center">
-                      Data Kosong/Sudah Dinilai Semua
+                      Data Kosong / Sudah Dinilai Semua
                     </Td>
                   </Tr>
                 )}
@@ -289,7 +289,7 @@ export default function NilaiList() {
                   ) : (
                     <Tr>
                       <Td colSpan={8} className="text-center">
-                        Data Kosong/Belum Dinilai Semua
+                        Data Kosong / Belum Dinilai Semua
                       </Td>
                     </Tr>
                   )}

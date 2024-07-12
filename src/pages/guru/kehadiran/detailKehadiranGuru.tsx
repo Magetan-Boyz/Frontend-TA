@@ -2,8 +2,7 @@ import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import axios from 'axios';
-import { useRouter } from 'next/router';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Input, Select, Spinner, useToast, Tag, TagLabel } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Select, Spinner, useToast, Tag, TagLabel } from '@chakra-ui/react';
 import Image from 'next/image';
 
 interface Student {
@@ -18,7 +17,8 @@ interface Attendance {
 }
 
 export default function ChecklistKehadiran() {
-  const [classData, setClassData] = React.useState({ id: '', name: '' });
+  const [classes, setClasses] = React.useState([]);
+  const [selectedClass, setSelectedClass] = React.useState({ id: '', name: '' });
   const [students, setStudents] = React.useState<Student[]>([]);
   const [attendance, setAttendance] = React.useState<Attendance[]>([]);
   const [filteredAttendance, setFilteredAttendance] = React.useState([]);
@@ -27,26 +27,32 @@ export default function ChecklistKehadiran() {
   const [loading, setLoading] = React.useState(false);
   const toast = useToast();
 
-  const router = useRouter();
-
   React.useEffect(() => {
-    const fetchClassData = async () => {
+    const fetchClassesAndSubjects = async () => {
       const token = localStorage.getItem('token');
       try {
-        const classResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class/homeroom`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const [classesResponse, subjectsResponse] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/all`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
 
-        const classInfo = classResponse.data.data;
-        setClassData({ id: classInfo.id, name: classInfo.name });
+        const classesData = classesResponse.data.data || [];
+        setClasses(classesData);
 
-        await fetchStudents(classInfo.id);
-        await fetchSubjects(classInfo.id);
+        const allSubjects = subjectsResponse.data.data.flatMap((subjectGroup) => subjectGroup.subject);
+        const uniqueSubjects = allSubjects.filter(
+          (subject, index, self) => index === self.findIndex((s) => s.subject_name === subject.subject_name)
+        );
+        setSubjects(uniqueSubjects || []);
       } catch (error) {
-        console.error('Error fetching class data:', error);
+        console.error('Error fetching classes and subjects:', error);
         toast({
           title: 'Error',
-          description: 'Gagal mengambil data kelas',
+          description: 'Gagal mengambil data kelas dan mata pelajaran',
           status: 'error',
           duration: 5000,
           isClosable: true
@@ -54,80 +60,47 @@ export default function ChecklistKehadiran() {
       }
     };
 
-    fetchClassData();
+    fetchClassesAndSubjects();
   }, []);
 
-  const fetchStudents = async (classId: string) => {
-    const token = localStorage.getItem('token');
-    setLoading(true);
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class/${classId}/students`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setStudents(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      toast({
-        title: 'Error',
-        description: 'Gagal mengambil data siswa',
-        status: 'error',
-        duration: 5000,
-        isClosable: true
-      });
-    } finally {
-      setLoading(false);
+  const handleClassChange = async (e) => {
+    const selectedClass = e.target.value;
+    setSelectedClass(selectedClass);
+    if (selectedClass && selectedSubject) {
+      fetchStudentsAndAttendance(selectedClass, selectedSubject);
     }
   };
 
-  const fetchSubjects = async (classId: string) => {
-    const token = localStorage.getItem('token');
-    setLoading(true);
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const allSubjects = response.data.data.flatMap((subjectGroup) => subjectGroup.subject);
-      setSubjects(allSubjects || []);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
-      toast({
-        title: 'Error',
-        description: 'Gagal mengambil data mata pelajaran',
-        status: 'error',
-        duration: 5000,
-        isClosable: true
-      });
-    } finally {
-      setLoading(false);
+  const handleSubjectChange = async (e) => {
+    const selectedSubject = e.target.value;
+    setSelectedSubject(selectedSubject);
+    if (selectedClass && selectedSubject) {
+      fetchStudentsAndAttendance(selectedClass, selectedSubject);
     }
   };
 
-  const fetchAttendance = async (subjectId: string) => {
-    const token = localStorage.getItem('token');
+  const fetchStudentsAndAttendance = async (classId, subjectId) => {
     setLoading(true);
+    const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/${subjectId}/attendance`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAttendance(response.data.data || []);
+      const [studentsResponse, attendanceResponse] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/class/${classId}/students`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/teacher/subject/${subjectId}/attendance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+
+      setStudents(studentsResponse.data.data || []);
+      setAttendance(attendanceResponse.data.data || []);
     } catch (error) {
-      console.error('Error fetching attendance:', error);
-      toast({
-        title: 'Error',
-        description: 'Gagal mengambil data kehadiran',
-        status: 'error',
-        duration: 5000,
-        isClosable: true
-      });
+      console.error('Error fetching data:', error);
+      setStudents([]);
+      setAttendance([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const subjectId = e.target.value;
-    setSelectedSubject(subjectId);
-    fetchAttendance(subjectId);
   };
 
   const calculateAttendance = () => {
@@ -162,11 +135,17 @@ export default function ChecklistKehadiran() {
             <h1 className="flex items-center gap-2 text-lg font-semibold">
               Detail Kehadiran Siswa{' '}
               <Tag colorScheme="blue" borderRadius="full" size="sm">
-                <TagLabel>{students.length} User</TagLabel>
+                <TagLabel>{students.length} Siswa</TagLabel>
               </Tag>
             </h1>
             <div className="flex items-center gap-2">
-              <Input type="text" className="w-fit p-2 border rounded-lg border-Gray-200 h-fit" value={classData.name} readOnly />
+              <Select placeholder="Pilih Kelas" size="md" onChange={handleClassChange}>
+                {classes.map((cls, index) => (
+                  <option key={index} value={cls.class_id}>
+                    {cls.class_name}
+                  </option>
+                ))}
+              </Select>
               <Select placeholder="Mata Pelajaran" size="md" onChange={handleSubjectChange}>
                 {subjects.map((subject, index) => (
                   <option key={index} value={subject.id}>

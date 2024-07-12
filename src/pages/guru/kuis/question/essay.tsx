@@ -2,14 +2,23 @@ import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
 import Seo from '@/components/Seo';
 import TextInput from '@/components/TextInput';
-import { Select } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
-import { useRouter } from 'next/router';
 
 export default function Essay() {
   const [pertanyaan, setPertanyaan] = React.useState('');
+  const [editIndex, setEditIndex] = React.useState(null);
   const router = useRouter();
+
+  React.useEffect(() => {
+    const editQuestionData = JSON.parse(localStorage.getItem('editQuestion'));
+    if (editQuestionData) {
+      setPertanyaan(editQuestionData.question.text);
+      setEditIndex(editQuestionData.index);
+      localStorage.removeItem('editQuestion');
+    }
+  }, []);
 
   const handleSaveQuestion = () => {
     const newQuestion = {
@@ -20,10 +29,12 @@ export default function Essay() {
 
     const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
     if (quizzes.length > 0) {
-      quizzes[0].questions.push(newQuestion);
+      if (editIndex !== null) {
+        quizzes[0].questions[editIndex] = newQuestion;
+      } else {
+        quizzes[0].questions.push(newQuestion);
+      }
       localStorage.setItem('quizzes', JSON.stringify(quizzes));
-    } else {
-      router.push('/guru/kuis/create');
     }
 
     router.push('/guru/kuis/create');

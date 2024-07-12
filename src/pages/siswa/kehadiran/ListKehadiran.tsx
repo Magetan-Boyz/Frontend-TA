@@ -61,13 +61,6 @@ export default function ListKehadiran() {
         <div className="w-full rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex items-center justify-between p-4">
             <h1 className="flex items-center gap-2 text-lg font-semibold">Presentase Kehadiran Siswa - {username}</h1>
-            <div className="flex items-center gap-2">
-              <Select placeholder="Kelas" size="md">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </div>
           </div>
           <div className="">
             <TableContainer className="">

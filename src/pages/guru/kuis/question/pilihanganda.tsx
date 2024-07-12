@@ -7,16 +7,18 @@ import { FiTrash2 } from 'react-icons/fi';
 import SecondaryButton from '@/components/SecondaryButton';
 import { MdAdd } from 'react-icons/md';
 import PrimaryButton from '@/components/PrimaryButton';
+import Checkbox from '@/components/Checkbox';
 
 interface RadioCardProps extends UseRadioProps {
   children: React.ReactNode;
+  isChecked: boolean;
 }
 
 function RadioCard(props: RadioCardProps) {
-  const { getInputProps, getRadioProps } = useRadio(props);
+  const { getInputProps, getCheckboxProps } = useRadio(props);
 
   const input = getInputProps();
-  const checkbox = getRadioProps();
+  const checkbox = getCheckboxProps();
 
   return (
     <Box as="label" w="full" display="flex" alignItems="center">
@@ -38,6 +40,9 @@ function RadioCard(props: RadioCardProps) {
         px={5}
         py={3}
         w="full"
+        bg={props.isChecked ? 'blue.50' : ''}
+        color={props.isChecked ? 'black' : ''}
+        borderColor={props.isChecked ? 'blue.900' : ''}
       >
         {props.children}
       </Box>
@@ -48,13 +53,26 @@ function RadioCard(props: RadioCardProps) {
 export default function PilihanGanda() {
   const router = useRouter();
   const [pertanyaan, setPertanyaan] = React.useState('');
-  const [jawaban, setJawaban] = React.useState('');
   const [option, setOption] = React.useState(['']);
   const [correctAnswer, setCorrectAnswer] = React.useState('');
-  const [type] = React.useState('multiple-choice');
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editIndex, setEditIndex] = React.useState(null);
+
+  React.useEffect(() => {
+    const editData = JSON.parse(localStorage.getItem('editQuestion'));
+    if (editData) {
+      setPertanyaan(editData.question.text);
+      setOption(editData.question.options);
+      setCorrectAnswer(editData.question.correct_answer);
+      setIsEditing(true);
+      setEditIndex(editData.index);
+    }
+  }, []);
 
   const handleAddOption = () => {
-    setOption([...option, '']);
+    if (option.length < 5) {
+      setOption([...option, '']);
+    }
   };
 
   const handleRemoveOption = (index: number) => {
@@ -67,6 +85,10 @@ export default function PilihanGanda() {
     setOption(newOption);
   };
 
+  const handleCheckboxChange = (value: string) => {
+    setCorrectAnswer(value);
+  };
+
   const handleSaveQuestion = () => {
     const newQuestion = {
       text: pertanyaan,
@@ -76,17 +98,19 @@ export default function PilihanGanda() {
 
     const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
     if (quizzes.length > 0) {
-      quizzes[0].questions.push(newQuestion);
+      if (isEditing) {
+        quizzes[0].questions[editIndex] = newQuestion;
+        localStorage.removeItem('editQuestion');
+      } else {
+        quizzes[0].questions.push(newQuestion);
+      }
       localStorage.setItem('quizzes', JSON.stringify(quizzes));
-    } else {
-      router.push('/guru/kuis/create');
     }
     router.push('/guru/kuis/create');
   };
 
   const { getRootProps, getRadioProps } = useRadioGroup({
-    name: 'framework',
-    onChange: (value) => setCorrectAnswer(value)
+    name: 'framework'
   });
 
   const group = getRootProps();
@@ -112,42 +136,41 @@ export default function PilihanGanda() {
               onChange={(e) => setPertanyaan(e.target.value)}
             />
             <div className="flex flex-col gap-5">
-              {type === 'multiple-choice' ? (
-                <div className="flex flex-col w-full gap-3" {...group}>
-                  {option.map((value, index) => {
-                    const radio = getRadioProps({ value });
-                    return (
-                      <div key={index} className="flex items-center w-full gap-3">
-                        <RadioCard {...radio}>
-                          <input
-                            type="text"
-                            value={value}
-                            onChange={(e) => handleOptionChange(index, e.target.value)}
-                            className="w-full p-3 rounded-lg"
-                          />
-                        </RadioCard>
-                        <Box
-                          as="button"
-                          onClick={() => handleRemoveOption(index)}
-                          className="flex items-center tetx-3xl justify-center p-8 text-gray-500 border border-[#D0D5DD] rounded-md"
-                        >
-                          <FiTrash2 className="" />
-                        </Box>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <textarea
-                  value={jawaban}
-                  onChange={(e) => setJawaban(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                  rows={5}
-                />
+              <div className="flex flex-col w-full gap-3" {...group}>
+                {option.map((value, index) => {
+                  const radio = getRadioProps({ value });
+                  return (
+                    <div key={index} className="flex items-center w-full gap-3">
+                      <RadioCard {...radio} isChecked={correctAnswer === value}>
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => handleOptionChange(index, e.target.value)}
+                          className="w-full p-3 rounded-lg"
+                        />
+                      </RadioCard>
+                      <Box
+                        as="label"
+                        className={`flex items-center justify-center p-8 text-gray-500 border rounded-md ${correctAnswer === value ? 'border-Primary-900' : 'border-[#D0D5DD]'}`}
+                      >
+                        <Checkbox checked={correctAnswer === value} onChange={() => handleCheckboxChange(value)} />
+                      </Box>
+                      <Box
+                        as="button"
+                        onClick={() => handleRemoveOption(index)}
+                        className="flex items-center justify-center p-8 text-gray-500 border border-[#D0D5DD] rounded-md"
+                      >
+                        <FiTrash2 className="" />
+                      </Box>
+                    </div>
+                  );
+                })}
+              </div>
+              {option.length < 5 && (
+                <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddOption}>
+                  Tambah Jawaban Lain
+                </SecondaryButton>
               )}
-              <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddOption}>
-                Tambah Jawaban Lain
-              </SecondaryButton>
             </div>
 
             <div className="flex justify-start gap-5">

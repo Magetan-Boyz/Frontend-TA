@@ -95,6 +95,10 @@ export default function Hasil() {
     return (totalpoint / 100) * 100;
   };
 
+  const handleDetails = (id) => {
+    router.push(`/guru/kuis/hasil/${id}?type=Essay`);
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -169,7 +173,7 @@ export default function Hasil() {
                       <Td>{item.grade}/100</Td>
                       <Td>{getStatusTag(item.status)}</Td>
                       <Td>
-                        <SecondaryButton btnClassName="w-fit h-fit" onClick={() => router.push(`/guru/kuis/hasil/${item.id}`)}>
+                        <SecondaryButton size="mini" btnClassName="w-fit h-fit" onClick={() => handleDetails(item.id)}>
                           Details
                         </SecondaryButton>
                       </Td>

@@ -7,6 +7,7 @@ import Checkbox from '@/components/Checkbox';
 import Image from 'next/image';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import SecondaryButton from '@/components/SecondaryButton';
 
 export default function Hasil() {
   const router = useRouter();
@@ -112,6 +113,7 @@ export default function Hasil() {
                     <Th>(%)</Th>
                     <Th>Total Points</Th>
                     <Th>Status</Th>
+                    <Th></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -147,6 +149,15 @@ export default function Hasil() {
                             <TagLabel>Not Submitted</TagLabel>
                           </Tag>
                         )}
+                      </Td>
+                      <Td>
+                        <SecondaryButton
+                          btnClassName="w-fit h-fit"
+                          size="mini"
+                          onClick={() => router.push(`/guru/kuis/hasil/${item.id}?type=Multiple%20Choice`)}
+                        >
+                          Details
+                        </SecondaryButton>
                       </Td>
                     </Tr>
                   ))}

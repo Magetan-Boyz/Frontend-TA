@@ -12,6 +12,7 @@ export default function Literasi() {
   const [literations, setLiterations] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [reverseOrder, setReverseOrder] = React.useState(false); // State for reverse order toggle
 
   React.useEffect(() => {
     axios
@@ -35,6 +36,20 @@ export default function Literasi() {
       });
   }, []);
 
+  // Function to handle toggling between reverse order
+  const toggleReverseOrder = () => {
+    setReverseOrder(!reverseOrder);
+  };
+
+  // Function to get literations in reverse order if toggle is enabled
+  const getOrderedLiterations = () => {
+    if (reverseOrder) {
+      return [...literations].reverse();
+    } else {
+      return [...literations];
+    }
+  };
+
   return (
     <div>
       <AuthenticatedLayout>
@@ -51,19 +66,25 @@ export default function Literasi() {
               <label htmlFor="sort" className="text-sm font-medium text-Gray-700">
                 Urutkan Berdasarkan
               </label>
-              <Select placeholder="Kelas" size="md" name="sort" className="">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+              <Select
+                value={reverseOrder ? 'newest' : 'oldest'}
+                onChange={toggleReverseOrder}
+                placeholder="Sort"
+                size="md"
+                name="sort"
+                className=""
+              >
+                <option value="newest">Terbaru</option>
+                <option value="oldest">Terlama</option>
               </Select>
             </span>
           </div>
-          <div className="m-3 border rounded-lg shadow-sm ">
+          <div className="m-3 border rounded-lg shadow-sm">
             <Table className="">
               <Thead className="bg-Gray-50">
                 <Tr>
                   <Th>Judul Literasi</Th>
-                  <Th>Deskripsi</Th>
+                  <Th>Nilai</Th>
                   <Th>Feedback</Th>
                   <Th></Th>
                 </Tr>
@@ -84,7 +105,6 @@ export default function Literasi() {
                       <Td>
                         <Skeleton height="20px" />
                       </Td>
-                      <Td></Td>
                     </Tr>
                     <Tr>
                       <Td>
@@ -99,20 +119,19 @@ export default function Literasi() {
                       <Td>
                         <Skeleton height="20px" />
                       </Td>
-                      <Td></Td>
                     </Tr>
                   </>
                 ) : error ? (
                   <Tr>
-                    <Td colSpan={5} className="text-center py-5 text-Gray-600">
+                    <Td colSpan={4} className="text-center py-5 text-Gray-600">
                       {error}
                     </Td>
                   </Tr>
                 ) : literations.length > 0 ? (
-                  literations.map((item, index) => (
+                  getOrderedLiterations().map((item, index) => (
                     <Tr key={index}>
                       <Td>{item.title}</Td>
-                      <Td>{item.description}</Td>
+                      <Td>{item.point}</Td>
                       <Td>{item.feedback}</Td>
                       <Td>
                         <SecondaryButton
@@ -126,7 +145,7 @@ export default function Literasi() {
                   ))
                 ) : (
                   <Tr>
-                    <Td colSpan={5} className="text-center py-5 text-Gray-600">
+                    <Td colSpan={4} className="text-center py-5 text-Gray-600">
                       Tidak ada literasi yang tersedia.
                     </Td>
                   </Tr>

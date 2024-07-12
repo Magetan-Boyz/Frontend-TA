@@ -8,6 +8,7 @@ import SecondaryButton from '@/components/SecondaryButton';
 import { MdAdd } from 'react-icons/md';
 import PrimaryButton from '@/components/PrimaryButton';
 import axios from 'axios';
+import Checkbox from '@/components/Checkbox';
 
 interface RadioCardProps extends UseRadioProps {
   children: React.ReactNode;
@@ -65,7 +66,13 @@ export default function PilihanGanda() {
   }, [question]);
 
   const handleAddOption = () => {
-    setOption([...option, '']);
+    if (option.length < 5) {
+      setOption([...option, '']);
+    }
+  };
+
+  const handleCheckboxChange = (value: string) => {
+    setCorrectAnswer(value);
   };
 
   const handleRemoveOption = (index: number) => {
@@ -146,8 +153,7 @@ export default function PilihanGanda() {
   };
 
   const { getRootProps, getRadioProps } = useRadioGroup({
-    name: 'framework',
-    onChange: (value) => setCorrectAnswer(value)
+    name: 'framework'
   });
 
   const group = getRootProps();
@@ -188,9 +194,15 @@ export default function PilihanGanda() {
                           />
                         </RadioCard>
                         <Box
+                          as="label"
+                          className={`flex items-center justify-center p-8 text-gray-500 border rounded-md ${correctAnswer === value ? 'border-Primary-900' : 'border-[#D0D5DD]'}`}
+                        >
+                          <Checkbox checked={correctAnswer === value} onChange={() => handleCheckboxChange(value)} />
+                        </Box>
+                        <Box
                           as="button"
                           onClick={() => handleRemoveOption(index)}
-                          className="flex items-center text-3xl justify-center p-8 text-gray-500 border border-[#D0D5DD] rounded-md"
+                          className="flex items-center tetx-3xl justify-center p-8 text-gray-500 border border-[#D0D5DD] rounded-md"
                         >
                           <FiTrash2 />
                         </Box>
@@ -206,9 +218,11 @@ export default function PilihanGanda() {
                   rows={5}
                 />
               )}
-              <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddOption}>
-                Tambah Jawaban Lain
-              </SecondaryButton>
+              {option.length < 5 && (
+                <SecondaryButton btnClassName="w-fit h-fit" leftIcon={<MdAdd className="text-lg" />} onClick={handleAddOption}>
+                  Tambah Jawaban Lain
+                </SecondaryButton>
+              )}
             </div>
 
             <div className="flex justify-start gap-5">

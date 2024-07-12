@@ -105,10 +105,10 @@ export default function KontenMateri({ kontenMateri, setKontenMateri }: KontenMa
             <Input value={selectedSession.title} onChange={(e) => handleSessionChange('title', e.target.value)} />
           </div>
           <div className="flex flex-col gap-3">
-            <h1 className="text-sm font-semibold text-Gray-600">Deskripsi Materi</h1>
+            <h1 className="text-sm font-semibold text-Gray-600">Deskripsi Konten</h1>
             <Textarea
               value={selectedSession.description || ''}
-              placeholder="Deskripsi materi"
+              placeholder="Deskripsi konten"
               onChange={(e) => handleSessionChange('description', e.target.value)}
             />
           </div>

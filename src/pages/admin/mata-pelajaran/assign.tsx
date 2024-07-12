@@ -32,7 +32,7 @@ import Image from 'next/image';
 
 interface Teacher {
   id: number;
-  name: string;
+  teacher_name: string;
   email: string;
 }
 
@@ -51,7 +51,7 @@ export default function AssignGuruPengajar() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [searchTerm2, setSearchTerm2] = React.useState('');
   const [guruAll, setGuruAll] = React.useState<Teacher[]>([]);
-  const [filteredTeachers, setFilteredTeachers] = React.useState<Teacher[]>([]);
+  const [filteredTeachers, setFilteredTeachers] = React.useState<Teacher[] | null>(null);
   const [selectedTeachers, setSelectedTeachers] = React.useState<Teacher[]>([]);
   const [currentSubjectId, setCurrentSubjectId] = React.useState<number | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -89,7 +89,7 @@ export default function AssignGuruPengajar() {
         const subjects: Subject[] = response.data.data || [];
         setMapel(subjects);
 
-        setJenisMapelOptions(subjects);
+        setJenisMapelOptions(subjects.map((subject) => subject.name));
         setLoading(false);
 
         // Fetch teachers for each subject
@@ -126,7 +126,13 @@ export default function AssignGuruPengajar() {
   };
 
   const handleSearchChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm2(e.target.value);
+    const value = e.target.value;
+    setSearchTerm2(value);
+    if (value) {
+      setFilteredTeachers(guruAll.filter((teacher) => teacher.name.toLowerCase().includes(value.toLowerCase())));
+    } else {
+      setFilteredTeachers(null);
+    }
   };
 
   const handleSelectTeacher = (teacher: Teacher) => {
@@ -138,6 +144,8 @@ export default function AssignGuruPengajar() {
         return [...prev, teacher]; // Add to selection
       }
     });
+    setSearchTerm2(''); // Reset search term after selecting a teacher
+    setFilteredTeachers(null); // Reset filtered teachers after selecting a teacher
   };
 
   const handleSubmit = async () => {
@@ -190,7 +198,7 @@ export default function AssignGuruPengajar() {
   const filteredMapel = mapel
     .filter((item) => item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((item) => (selectedJenisMapel ? item.name === selectedJenisMapel : true))
-    .filter((item) => (selectedSemester ? item.semester === selectedSemester : true));
+    .filter((item) => (selectedSemester ? item.semester === parseInt(selectedSemester) : true));
 
   return (
     <div>
@@ -213,8 +221,8 @@ export default function AssignGuruPengajar() {
                 onChange={(e) => setSelectedJenisMapel(e.target.value)}
               >
                 {jenisMapelOptions.map((option, index) => (
-                  <option key={index} value={option.name}>
-                    {option.name}
+                  <option key={index} value={option}>
+                    {option}
                   </option>
                 ))}
               </Select>
@@ -231,9 +239,12 @@ export default function AssignGuruPengajar() {
                 className=""
                 onChange={(e) => setSelectedSemester(e.target.value)}
               >
-                <option value="1 & 2">1 & 2</option>
-                <option value="3 & 4">3 & 4</option>
-                <option value="5 & 6">5 & 6</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
               </Select>
             </span>
             <span className="flex flex-col justify-end w-full gap-4">
@@ -350,7 +361,7 @@ export default function AssignGuruPengajar() {
                     </div>
                   </div>
                   <div className="flex flex-col py-3 overflow-y-auto h-fit">
-                    {filteredTeachers.length > 0 ? (
+                    {filteredTeachers && filteredTeachers.length > 0 ? (
                       filteredTeachers.map((teacher, index) => (
                         <div
                           className="flex items-center w-full gap-3 px-8 py-4 border-b justify-between border-Gray-200 cursor-pointer"

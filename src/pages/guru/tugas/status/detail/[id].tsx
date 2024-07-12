@@ -109,7 +109,7 @@ export default function DetailTugas() {
               href={`https://${assignment.submission}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full p-3 text-sm font-medium border rounded-lg h-fit text-Gray-500"
+              className="w-full p-3 text-sm font-medium border rounded-lg h-fit underline text-Primary-400"
             >
               {assignment.submission}
             </a>

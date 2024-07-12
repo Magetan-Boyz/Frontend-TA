@@ -1,10 +1,8 @@
 import * as React from 'react';
 import AuthenticatedLayout from '@/components/layout/layoutGuru/AuthenticatedLayout';
-// import Navbar from '@/components/Navbar';
 import Seo from '@/components/Seo';
 import Image from 'next/image';
 import axios from 'axios';
-
 import { Table, Thead, Tr, Th, Tbody, Td, TableContainer, Tag, TagLabel, Box, Text } from '@chakra-ui/react';
 import SecondaryButton from '@/components/SecondaryButton';
 import { useRouter } from 'next/router';
@@ -15,6 +13,9 @@ export default function PrestasiList() {
   const router = useRouter();
   const [prestasi, setPrestasi] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 10;
 
   React.useEffect(() => {
     axios
@@ -24,18 +25,19 @@ export default function PrestasiList() {
         }
       })
       .then((response) => {
-        setPrestasi(response.data.data || []); // Ensure prestasi is an array
-        setLoading(false); // Set loading to false after data is fetched
+        setPrestasi(response.data.data || []);
+        setLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching achievements:', error);
-        setPrestasi([]); // Ensure prestasi is an array in case of error
-        setLoading(false); // Set loading to false even if there's an error
+        setPrestasi([]);
+        setLoading(false);
       });
   }, []);
 
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 10;
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -44,17 +46,21 @@ export default function PrestasiList() {
   };
 
   const handleNextPage = () => {
-    if (currentPage < Math.ceil(prestasi.length / itemsPerPage)) {
+    if (currentPage < Math.ceil(filteredPrestasi.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const currentData = prestasi.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const filteredPrestasi = prestasi.filter(
+    (item) =>
+      item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.type_of_achivement.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.participation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.level.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const currentData = filteredPrestasi.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div>
@@ -81,7 +87,7 @@ export default function PrestasiList() {
               <Box className="flex justify-center items-center py-10">
                 <Text>Loading...</Text>
               </Box>
-            ) : prestasi.length === 0 ? (
+            ) : filteredPrestasi.length === 0 ? (
               <Box className="flex justify-center items-center py-10">
                 <Text>No achievements found</Text>
               </Box>
@@ -102,7 +108,7 @@ export default function PrestasiList() {
                 <Tbody>
                   {currentData.map((item, index) => (
                     <Tr key={index}>
-                      <Td>{index + 1}</Td>
+                      <Td>{index + 1 + (currentPage - 1) * itemsPerPage}</Td>
                       <Td>{item.student_name}</Td>
                       <Td>{item.type_of_achivement}</Td>
                       <Td>{item.title}</Td>
@@ -139,7 +145,7 @@ export default function PrestasiList() {
               </Table>
             )}
           </TableContainer>
-          {prestasi.length > 0 && (
+          {filteredPrestasi.length > 0 && (
             <div id="pagination" className="flex justify-between p-3 border-t border-Gray-200">
               <SecondaryButton
                 btnClassName={`font-semibold w-fit ${currentPage === 1 ? 'text-Gray-300 border-Gray-300' : ''}`}
@@ -149,12 +155,12 @@ export default function PrestasiList() {
                 Previous
               </SecondaryButton>
               <span className="self-center">
-                Page {currentPage} of {Math.ceil(prestasi.length / itemsPerPage)}
+                Page {currentPage} of {Math.ceil(filteredPrestasi.length / itemsPerPage)}
               </span>
               <SecondaryButton
-                btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(prestasi.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
+                btnClassName={`font-semibold w-fit ${currentPage === Math.ceil(filteredPrestasi.length / itemsPerPage) ? 'text-Gray-300 border-Gray-300' : ''}`}
                 onClick={handleNextPage}
-                disabled={currentPage === Math.ceil(prestasi.length / itemsPerPage)}
+                disabled={currentPage === Math.ceil(filteredPrestasi.length / itemsPerPage)}
               >
                 Next
               </SecondaryButton>

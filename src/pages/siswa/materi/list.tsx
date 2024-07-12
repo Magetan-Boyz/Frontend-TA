@@ -117,10 +117,10 @@ const Susun = () => {
     setItems(sortedItems);
   };
 
-  const handleSubItemClick = (matterId) => {
+  const handleSubItemClick = (matterId, subMatterId) => {
     router.push({
       pathname: `/siswa/materi/${matterId}`,
-      query: { matterId }
+      query: { matterId: matterId, submater: subMatterId }
     });
   };
 
@@ -175,7 +175,11 @@ const Susun = () => {
                   {expanded === id && (
                     <>
                       {sub?.map((subItem, subIndex) => (
-                        <button key={subItem.id} className="p-5 border-b w-full border-Gray-200" onClick={() => handleSubItemClick(id)}>
+                        <button
+                          key={subItem.id}
+                          className="p-5 flex justify-start border-b w-full border-Gray-200"
+                          onClick={() => handleSubItemClick(id, subItem.id)}
+                        >
                           <h1 className="font-bold text-md cursor-pointer">{subItem.title}</h1>
                         </button>
                       ))}

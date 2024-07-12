@@ -92,11 +92,6 @@ export default function List() {
                   <FiSearch />
                 </div>
               </div>
-              <Select placeholder="Kelas" size="md" className="w-fit">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
             </div>
           </div>
           {loading ? (

@@ -88,17 +88,16 @@ export default function PrestasiList() {
         <Seo templateTitle="Detail Nilai" />
         <div className="w-full p-3 rounded-md shadow-lg h-fit bg-Base-white">
           <div className="flex justify-between w-full p-3 border-b border-Gray-200">
-            <h1 className="text-lg font-semibold">Grades</h1>
-            <div className="flex gap-3">
-              <Select placeholder="Kelas" size="md">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
-              </Select>
-            </div>
+            <h1 className="text-lg font-semibold">Prestasi</h1>
           </div>
           <div className="flex items-center gap-5 p-7">
-            <Avatar size="2xl" name={profile.name} src="https://bit.ly/sage-adebayo" showBorder={true} className="shadow-lg" />
+            <Avatar
+              size="2xl"
+              name={profile.name}
+              src={`https://ui-avatars.com/api/?name=${profile.name}&size=35&background=random&color=fff`}
+              showBorder={true}
+              className="shadow-lg"
+            />
             <div>
               <h1 className="text-3xl font-semibold">{profile.name}</h1>
               <h1 className=" text-Gray-600 text-medium">NISN : {profile.nisn}</h1>

@@ -141,9 +141,12 @@ export default function ChecklistKehadiran() {
               >
                 Edit
               </Button>
+              <PrimaryButton size="mini" btnClassName="w-fit h-fit" onClick={() => router.push('/guru/kehadiran/detailKehadiranGuru')}>
+                Overview Absensi
+              </PrimaryButton>
             </div>
           </div>
-          <div className="">
+          <div className="pb-5">
             {loading ? (
               <div className="flex justify-center items-center">
                 <Spinner size="xl" />

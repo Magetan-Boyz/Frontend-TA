@@ -24,13 +24,15 @@ export default function PreviewTugas() {
   const toast = useToast();
 
   const [classSubjectData, setClassSubjectData] = React.useState([]);
+  const [classes, setClasses] = React.useState([]);
+  const [subjects, setSubjects] = React.useState([]);
   const [formData, setFormData] = React.useState({
     class_id: '',
     subject_id: '',
     title: '',
     type_of_task: '',
     description: '',
-    deadline: '',
+    deadline: initiallySelectedDate.toISOString().split('T')[0],
     link: ''
   });
 
@@ -51,14 +53,32 @@ export default function PreviewTugas() {
       })
       .then((response) => {
         if (response.data && response.data.data) {
-          setClassSubjectData(response.data.data);
+          const classSubjectData = response.data.data;
+          setClassSubjectData(classSubjectData);
+
+          const uniqueClasses = [];
+          const uniqueSubjects = [];
+          classSubjectData.forEach((item) => {
+            if (!uniqueClasses.some((cls) => cls.class_id === item.class_id)) {
+              uniqueClasses.push({ class_id: item.class_id, class_name: item.class_name });
+            }
+            if (!uniqueSubjects.some((sub) => sub.subject_id === item.subject_id)) {
+              uniqueSubjects.push({ subject_id: item.subject_id, subject_name: item.subject_name });
+            }
+          });
+          setClasses(uniqueClasses);
+          setSubjects(uniqueSubjects);
         } else {
           setClassSubjectData([]);
+          setClasses([]);
+          setSubjects([]);
         }
       })
       .catch((error) => {
         console.error('Error fetching classes and subjects:', error);
         setClassSubjectData([]);
+        setClasses([]);
+        setSubjects([]);
       });
 
     axios
@@ -86,6 +106,10 @@ export default function PreviewTugas() {
     } else {
       setSelectedDates([...selectedDates, day]);
     }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      deadline: day.toISOString().split('T')[0]
+    }));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +131,7 @@ export default function PreviewTugas() {
     const updatedFormData = { ...formData, deadline: formattedDeadline };
 
     axios
-      .post('https://ems-30c1804a223a.herokuapp.com/api/teacher/task/create', updatedFormData, {
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/teacher/task/create`, updatedFormData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -127,7 +151,7 @@ export default function PreviewTugas() {
           title: '',
           type_of_task: '',
           description: '',
-          deadline: '',
+          deadline: initiallySelectedDate.toISOString().split('T')[0],
           link: ''
         });
       })
@@ -158,15 +182,19 @@ export default function PreviewTugas() {
               </PrimaryButton>
             </div>
             <div className="flex items-center justify-center gap-5">
-              <Select placeholder="Kelas" size="md">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+              <Select placeholder="Mata Pelajaran" size="md">
+                {subjects.map((subject) => (
+                  <option key={subject.subject_id} value={subject.subject_id}>
+                    {subject.subject_name}
+                  </option>
+                ))}
               </Select>
               <Select placeholder="Kelas" size="md">
-                <option value="1">X</option>
-                <option value="2">XI</option>
-                <option value="3">XII</option>
+                {classes.map((cls) => (
+                  <option key={cls.class_id} value={cls.class_id}>
+                    {cls.class_name}
+                  </option>
+                ))}
               </Select>
               <PrimaryButton btnClassName="lg:flex w-fit h-fit hidden" onClick={onOpen}>
                 Buat Tugas
@@ -256,7 +284,7 @@ export default function PreviewTugas() {
                   value={formData.class_id}
                   onChange={handleInputChange}
                 >
-                  {classSubjectData.map((cls) => (
+                  {classes.map((cls) => (
                     <option key={cls.class_id} value={cls.class_id}>
                       {cls.class_name}
                     </option>
@@ -273,7 +301,7 @@ export default function PreviewTugas() {
                   value={formData.subject_id}
                   onChange={handleInputChange}
                 >
-                  {classSubjectData.map((subject) => (
+                  {subjects.map((subject) => (
                     <option key={subject.subject_id} value={subject.subject_id}>
                       {subject.subject_name}
                     </option>

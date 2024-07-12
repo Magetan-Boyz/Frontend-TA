@@ -45,7 +45,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = React.useState(initiallySelectedDate);
   const [schedule, setSchedule] = React.useState<ScheduleItem[]>([]);
   const [semester, setSemester] = React.useState('1');
-  const [academicYear, setAcademicYear] = React.useState('2023 - 2024');
+  const [academicYear, setAcademicYear] = React.useState('2023-2024');
   const [loadingSchedule, setLoadingSchedule] = React.useState(true);
   const [attendance, setAttendance] = React.useState([]);
   const [groupedAttendance, setGroupedAttendance] = React.useState([]);
@@ -76,7 +76,7 @@ export default function Home() {
     setLoading(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/grade`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/student/grades`, {
         headers: {
           Authorization: `Bearer ${token}`
         },

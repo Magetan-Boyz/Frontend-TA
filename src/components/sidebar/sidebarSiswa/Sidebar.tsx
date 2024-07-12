@@ -12,8 +12,6 @@ import axios from 'axios';
 export default function Sidebar() {
   const router = useRouter();
   const [username, setUsername] = useState(''); // Add this line
-  const email = 'oliviarodrigo@gmail.com';
-  const subString = email.slice(0, 16) + '...';
   const handleClick = () => {
     router.push('/support');
   };
@@ -33,7 +31,9 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile/logout`, {
-      token: localStorage.getItem('token')
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
     });
     localStorage.clear();
     router.push('/login');
@@ -72,11 +72,10 @@ export default function Sidebar() {
                 <div className="text-md">Settings</div>
               </button>
               <div className="mx-auto border-t w-full border-[#BBBBBB]">
-                <div className="flex gap-4 mt-6">
+                <div className="flex items-center gap-4 mt-6">
                   <Image src={`https://ui-avatars.com/api/?name=${username}`} alt="Logo" width={40} height={24} className="rounded-full" />
                   <div>
                     <p className="hidden text-sm font-semibold lg:block">{username}</p>
-                    <p className="hidden text-sm text-Gray-600 lg:block">{subString}</p>
                   </div>
                   <button onClick={handleLogout}>
                     <FiLogOut className="text-xl" />
